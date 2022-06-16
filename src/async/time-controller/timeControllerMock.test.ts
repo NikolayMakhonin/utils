@@ -5,7 +5,7 @@ import {timeControllerDefault} from './timeControllerDefault'
 import {delay} from '../delay'
 
 describe('time-controller > timeControllerMock', function () {
-  this.timeout(600000)
+  this.timeout(6000000)
   function test({
     timeController,
     times,
@@ -136,27 +136,32 @@ describe('time-controller > timeControllerMock', function () {
 
     const events = []
     times.forEach(time => {
-      events.push({
-        start  : time.start,
-        timeout: time.timeout,
-        index  : time.index * 2,
-        event  : `completed: ${time.index}`,
-      })
+      if (time.abort != null && time.abort < 0) {
+        return
+      }
+      if (time.abort == null || time.abort >= time.timeout) {
+        events.push({
+          time : (time.start || 0) + (time.timeout || 0),
+          start: time.start,
+          index: time.index * 2,
+          event: `completed: ${time.index}`,
+        })
+      }
       if (time.abort != null) {
         events.push({
-          start  : time.start,
-          timeout: time.abort,
-          index  : time.index * 2 + 1,
-          event  : `aborted: ${time.index}`,
+          time : (time.start || 0) + (time.abort || 0),
+          start: time.start,
+          index: time.index * 2 + 1,
+          event: `aborted: ${time.index}`,
         })
       }
     })
     events.sort((o1, o2) => {
+      if (o1.time !== o2.time) {
+        return o1.time > o2.time || o1.time !== null && o2.time === null ? 1 : -1
+      }
       if (o1.start !== o2.start) {
         return o1.start > o2.start || o1.start !== null && o2.start === null ? 1 : -1
-      }
-      if (o1.timeout !== o2.timeout) {
-        return o1.timeout > o2.timeout || o1.timeout !== null && o2.timeout === null ? 1 : -1
       }
       if (o1.index !== o2.index) {
         return o1.index > o2.index ? 1 : -1
@@ -182,7 +187,7 @@ describe('time-controller > timeControllerMock', function () {
       expectedResult: [expectedResult],
     })
 
-    assert.deepStrictEqual(expectedResult, _expectedResult)
+    assert.deepStrictEqual(_expectedResult, expectedResult)
   })
 
   it('setTimeout order', async function () {
@@ -216,15 +221,15 @@ describe('time-controller > timeControllerMock', function () {
 
   it('base', async function () {
     await testVariants({
-      time1Start  : [null, 0, 10],
-      time1Timeout: [null, 0, 10],
-      time1Abort  : [null, -1, 0, 10],
-      time2Start  : [null, 30],
-      time2Timeout: [null, 30],
-      time2Abort  : [null, 30],
-      time3Start  : [null, 60],
-      time3Timeout: [null, 60],
-      time3Abort  : [null, 60],
+      time3Start  : [null],
+      time3Timeout: [null],
+      time3Abort  : [null],
+      time2Start  : [null, 0, 10, 20],
+      time2Timeout: [null, 0, 10, 20],
+      time2Abort  : [null, -1, 0, 10, 20],
+      time1Start  : [null, 0, 10, 20],
+      time1Timeout: [null, 0, 10, 20],
+      time1Abort  : [null, -1, 0, 10, 20],
     })
   })
 })
