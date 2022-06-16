@@ -7,7 +7,7 @@ import {PriorityQueue} from 'src/async/priority-queue'
 import {priorityCreate} from 'src/sync/priority'
 
 describe('helpers > TimeLimits', function () {
-  this.timeout(30000)
+  this.timeout(300000)
   type Mode = 'sync' | 'async' | 'random'
 
   async function test({
@@ -77,7 +77,7 @@ describe('helpers > TimeLimits', function () {
         }))
       }
 
-      await delay(5)
+      await delay(50)
 
       if (mode === 'async' || mode === 'random') {
         await delay(asyncTime)
@@ -112,13 +112,13 @@ describe('helpers > TimeLimits', function () {
     }
   }
 
-  xit('custom', async function () {
+  it('custom', async function () {
     await test({
-      maxCount         : 1,
-      timeMs           : 100,
-      asyncTime        : 20,
-      mode             : 'random',
-      withPriorityQueue: true,
+      maxCount         : 10,
+      timeMs           : 1000,
+      asyncTime        : 500,
+      mode             : 'async',
+      withPriorityQueue: false,
       timeLimitsTree   : true,
     })
   })
@@ -134,9 +134,9 @@ describe('helpers > TimeLimits', function () {
           for (const timeLimitsTree of timeLimitsTrees) {
             await test({
               maxCount,
-              timeMs   : 100,
-              asyncTime: mode === 'async' ? 50
-                : mode === 'random' ? 20
+              timeMs   : 1000,
+              asyncTime: mode === 'async' ? 500
+                : mode === 'random' ? 200
                   : 0,
               mode,
               withPriorityQueue,
