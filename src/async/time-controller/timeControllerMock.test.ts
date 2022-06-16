@@ -205,7 +205,7 @@ describe('time-controller > timeControllerMock', function () {
     }
   })
 
-  xit('custom', async function () {
+  xit('custom 1', async function () {
     await testVariants({
       time1Start  : [0],
       time1Timeout: [0],
@@ -219,17 +219,31 @@ describe('time-controller > timeControllerMock', function () {
     })
   })
 
+  it('custom 2', async function () {
+    await testVariants({
+      time3Start  : [null],
+      time3Timeout: [null],
+      time3Abort  : [null],
+      time2Start  : [null],
+      time2Timeout: [0],
+      time2Abort  : [20],
+      time1Start  : [0],
+      time1Timeout: [0],
+      time1Abort  : [null],
+    })
+  })
+
   it('base', async function () {
     await testVariants({
-      time3Start  : [null, 0, 10, 20],
-      time3Timeout: [null, 0, 10, 20],
-      time3Abort  : [null, -1, 0, 10, 20],
-      time2Start  : [null, 0, 10, 20],
-      time2Timeout: [null, 0, 10, 20],
-      time2Abort  : [null, -1, 0, 10, 20],
-      time1Start  : [null, 0, 10, 20],
-      time1Timeout: [null, 0, 10, 20],
-      time1Abort  : [null, -1, 0, 10, 20],
+      time3Start  : [null, 0, 20, 40],
+      time3Timeout: [null, 0, 20, 40],
+      time3Abort  : [null, -1, 0, 20, 40],
+      time2Start  : [null, 0, 20, 40],
+      time2Timeout: [null, 0, 20, 40],
+      time2Abort  : [null, -1, 0, 20, 40],
+      time1Start  : [null, 0, 20, 40],
+      time1Timeout: [null, 0, 20, 40],
+      time1Abort  : [null, -1, 0, 20, 40],
     })
   })
 })
