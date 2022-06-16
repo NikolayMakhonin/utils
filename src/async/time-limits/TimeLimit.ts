@@ -9,15 +9,18 @@ export class TimeLimit implements ITimeLimit {
   private readonly _maxCount: number
   private readonly _timeMs: number
   private readonly _priorityQueue: PriorityQueue
+  private readonly _setTimeout: (func: () => void, timeout?: number) => void
 
   constructor({
     maxCount,
     timeMs,
     priorityQueue,
+    setTimeout,
   }: {
     maxCount: number,
     timeMs: number,
     priorityQueue?: PriorityQueue,
+    setTimeout?: (func: () => void, timeout?: number) => void,
   }) {
     this._maxCount = maxCount
     this._timeMs = timeMs
@@ -72,7 +75,7 @@ export class TimeLimit implements ITimeLimit {
       return result
     }
     finally {
-      setTimeout(this._releaseFunc, this._timeMs)
+      this._setTimeout(this._releaseFunc, this._timeMs)
     }
   }
 }

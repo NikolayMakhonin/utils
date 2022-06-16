@@ -1,7 +1,7 @@
 import {PriorityQueue} from './PriorityQueue'
 import {priorityCreate} from 'src/sync/priority'
 
-describe('helpers > PriorityQueue', function () {
+describe('priority-queue > PriorityQueue', function () {
   it('base', async function () {
     const queue = new PriorityQueue()
     const log = []

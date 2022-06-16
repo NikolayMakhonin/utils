@@ -87,7 +87,7 @@ class PairingHeapTester<TItem> {
   }
 }
 
-describe('helpers > PairingHeap', function () {
+describe('pairing-heap > PairingHeap', function () {
   this.timeout(6000000)
 
   let totalTests = 0

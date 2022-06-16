@@ -1,6 +1,6 @@
 import {Priority, priorityCompare, priorityCreate} from './Priority'
 
-describe('helpers > Priority', function () {
+describe('priority > Priority', function () {
   function test(o1: Priority, o2: Priority, checkResult: -1 | 0 | 1) {
     let result = priorityCompare(o1, o2)
     assert.strictEqual(result, checkResult)

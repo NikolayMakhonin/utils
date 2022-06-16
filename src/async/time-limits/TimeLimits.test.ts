@@ -6,7 +6,7 @@ import {delay} from 'src/async/delay'
 import {PriorityQueue} from 'src/async/priority-queue'
 import {priorityCreate} from 'src/sync/priority'
 
-describe('helpers > TimeLimits', function () {
+describe('time-limits > TimeLimits', function () {
   this.timeout(300000)
   type Mode = 'sync' | 'async' | 'random'
 
