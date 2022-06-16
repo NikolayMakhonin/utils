@@ -168,16 +168,16 @@ describe('time-controller > timeControllerMock', function () {
       }
       throw new Error('Unexpected behavior')
     })
-    const expectedResult = events.map(o => o.event)
+    const _expectedResult = events.map(o => o.event)
 
-    // const expectedResult = await new Promise<string[]>((resolve, reject) => {
-    //   test({
-    //     timeController: timeControllerDefault,
-    //     times,
-    //     postDelay     : 300,
-    //     resolve,
-    //   })
-    // })
+    const expectedResult = await new Promise<string[]>((resolve, reject) => {
+      test({
+        timeController: timeControllerDefault,
+        times,
+        postDelay     : 300,
+        resolve,
+      })
+    })
 
     _testVariants({
       times         : [times],
@@ -187,7 +187,7 @@ describe('time-controller > timeControllerMock', function () {
       expectedResult: [expectedResult],
     })
 
-    // assert.deepStrictEqual(_expectedResult, expectedResult)
+    assert.deepStrictEqual(_expectedResult, expectedResult)
   })
 
   it('setTimeout order', async function () {
