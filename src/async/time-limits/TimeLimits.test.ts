@@ -70,7 +70,7 @@ describe('helpers > TimeLimits', function () {
         const order = len - 1 - i
         const async = mode === 'async' || mode === 'random' && Math.random() > 0.5
         const result = timeLimit.run(() => run(index, async ? asyncTime : 0), priorityCreate(order))
-        assert.ok(result instanceof Promise)
+        assert.ok(typeof result.then === 'function')
         promises.push(result.then(o => {
           assert.strictEqual(o, index)
           results.push(order)
