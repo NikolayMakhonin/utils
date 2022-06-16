@@ -5,7 +5,7 @@ import {timeControllerDefault} from './timeControllerDefault'
 import {delay} from '../delay'
 
 describe('time-controller > timeControllerMock', function () {
-  this.timeout(6000000)
+  this.timeout(60000000)
   function test({
     timeController,
     times,
@@ -21,7 +21,7 @@ describe('time-controller > timeControllerMock', function () {
     let timeMax = 0
     for (let i = 0, len = times.length; i < len; i++) {
       const time = times[i]
-      timeMax = Math.max((time.start || 0) + Math.max(time.timeout || 0, time.abort || 0))
+      timeMax = Math.max(timeMax, (time.start || 0) + Math.max(time.timeout || 0, time.abort || 0))
 
       const start = () => {
         const handle = timeController.setTimeout(() => {
@@ -168,16 +168,16 @@ describe('time-controller > timeControllerMock', function () {
       }
       throw new Error('Unexpected behavior')
     })
-    const _expectedResult = events.map(o => o.event)
+    const expectedResult = events.map(o => o.event)
 
-    const expectedResult = await new Promise<string[]>((resolve, reject) => {
-      test({
-        timeController: timeControllerDefault,
-        times,
-        postDelay     : 300,
-        resolve,
-      })
-    })
+    // const expectedResult = await new Promise<string[]>((resolve, reject) => {
+    //   test({
+    //     timeController: timeControllerDefault,
+    //     times,
+    //     postDelay     : 300,
+    //     resolve,
+    //   })
+    // })
 
     _testVariants({
       times         : [times],
@@ -187,7 +187,7 @@ describe('time-controller > timeControllerMock', function () {
       expectedResult: [expectedResult],
     })
 
-    assert.deepStrictEqual(_expectedResult, expectedResult)
+    // assert.deepStrictEqual(_expectedResult, expectedResult)
   })
 
   it('setTimeout order', async function () {
@@ -221,9 +221,9 @@ describe('time-controller > timeControllerMock', function () {
 
   it('base', async function () {
     await testVariants({
-      time3Start  : [null],
-      time3Timeout: [null],
-      time3Abort  : [null],
+      time3Start  : [null, 0, 10, 20],
+      time3Timeout: [null, 0, 10, 20],
+      time3Abort  : [null, -1, 0, 10, 20],
       time2Start  : [null, 0, 10, 20],
       time2Timeout: [null, 0, 10, 20],
       time2Abort  : [null, -1, 0, 10, 20],
