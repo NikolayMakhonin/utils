@@ -3,9 +3,21 @@ import {TimeControllerMock} from './timeControllerMock'
 import {ITimeController} from './contracts'
 import {timeControllerDefault} from './timeControllerDefault'
 import {delay} from '../delay'
+import {
+  setProcessPriority,
+  setThreadPriority,
+  PROCESS_PRIORITY_REALTIME,
+  THREAD_PRIORITY_REALTIME,
+} from 'rdtsc'
 
 describe('time-controller > timeControllerMock', function () {
-  this.timeout(60000000)
+  this.timeout(600000000)
+
+  before(() => {
+    setProcessPriority(PROCESS_PRIORITY_REALTIME)
+    setThreadPriority(THREAD_PRIORITY_REALTIME)
+  })
+
   function test({
     timeController,
     times,
@@ -94,7 +106,7 @@ describe('time-controller > timeControllerMock', function () {
     assert.deepStrictEqual(result, expectedResult)
   })
     
-  const testVariants = createTestVariants(async ({
+  const testVariants = createTestVariantsSync(({
     time1Start,
     time1Timeout,
     time1Abort,
@@ -168,26 +180,26 @@ describe('time-controller > timeControllerMock', function () {
       }
       throw new Error('Unexpected behavior')
     })
-    const _expectedResult = events.map(o => o.event)
+    const expectedResult = events.map(o => o.event)
 
-    const expectedResult = await new Promise<string[]>((resolve, reject) => {
-      test({
-        timeController: timeControllerDefault,
-        times,
-        postDelay     : 300,
-        resolve,
-      })
-    })
+    // const expectedResult = await new Promise<string[]>((resolve, reject) => {
+    //   test({
+    //     timeController: timeControllerDefault,
+    //     times,
+    //     postDelay     : 300,
+    //     resolve,
+    //   })
+    // })
 
     _testVariants({
       times         : [times],
-      step1         : [null],
-      step2         : [null],
-      step3         : [null],
+      step1         : [null, 0, 1, 2],
+      step2         : [null, 0, 1, 2],
+      step3         : [null, 0, 1, 2],
       expectedResult: [expectedResult],
     })
 
-    assert.deepStrictEqual(_expectedResult, expectedResult)
+    // assert.deepStrictEqual(_expectedResult, expectedResult)
   })
 
   it('setTimeout order', async function () {
@@ -233,17 +245,19 @@ describe('time-controller > timeControllerMock', function () {
     })
   })
 
-  it('base', async function () {
-    await testVariants({
-      time3Start  : [null, 0, 50, 100],
-      time3Timeout: [null, 0, 50, 100],
-      time3Abort  : [null, -1, 0, 50, 100],
-      time2Start  : [null, 0, 50, 100],
-      time2Timeout: [null, 0, 50, 100],
-      time2Abort  : [null, -1, 0, 50, 100],
-      time1Start  : [null, 0, 50, 100],
-      time1Timeout: [null, 0, 50, 100],
-      time1Abort  : [null, -1, 0, 50, 100],
+  it('base', function () {
+    const iterations = testVariants({
+      time3Start  : [null, 0, 1, 2],
+      time3Timeout: [null, 0, 1, 2],
+      time3Abort  : [null, -1, 0, 1, 2],
+      time2Start  : [null, 0, 1, 2],
+      time2Timeout: [null, 0, 1, 2],
+      time2Abort  : [null, -1, 0, 1, 2],
+      time1Start  : [null, 0, 1, 2],
+      time1Timeout: [null, 0, 1, 2],
+      time1Abort  : [null, -1, 0, 1, 2],
     })
+
+    console.log('iterations: ' + iterations)
   })
 })
