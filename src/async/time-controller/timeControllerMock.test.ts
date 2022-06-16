@@ -226,7 +226,7 @@ describe('time-controller > timeControllerMock', function () {
       time3Abort  : [null],
       time2Start  : [null],
       time2Timeout: [0],
-      time2Abort  : [20],
+      time2Abort  : [50],
       time1Start  : [0],
       time1Timeout: [0],
       time1Abort  : [null],
@@ -235,15 +235,15 @@ describe('time-controller > timeControllerMock', function () {
 
   it('base', async function () {
     await testVariants({
-      time3Start  : [null, 0, 20, 40],
-      time3Timeout: [null, 0, 20, 40],
-      time3Abort  : [null, -1, 0, 20, 40],
-      time2Start  : [null, 0, 20, 40],
-      time2Timeout: [null, 0, 20, 40],
-      time2Abort  : [null, -1, 0, 20, 40],
-      time1Start  : [null, 0, 20, 40],
-      time1Timeout: [null, 0, 20, 40],
-      time1Abort  : [null, -1, 0, 20, 40],
+      time3Start  : [null, 0, 50, 100],
+      time3Timeout: [null, 0, 50, 100],
+      time3Abort  : [null, -1, 0, 50, 100],
+      time2Start  : [null, 0, 50, 100],
+      time2Timeout: [null, 0, 50, 100],
+      time2Abort  : [null, -1, 0, 50, 100],
+      time1Start  : [null, 0, 50, 100],
+      time1Timeout: [null, 0, 50, 100],
+      time1Abort  : [null, -1, 0, 50, 100],
     })
   })
 })
