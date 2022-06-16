@@ -147,8 +147,8 @@ const browserConfig = ({input, outputDir, outputFile}) => ({
 const browserTestsConfig = {
   cache: true,
   input: [
-    'src/helpers/test/show-useragent.ts',
-    'src/helpers/test/register.ts',
+    'src/test/show-useragent.ts',
+    'src/test/register.ts',
     'src/**/*.test.ts',
   ],
   output: {
