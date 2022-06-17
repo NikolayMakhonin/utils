@@ -146,6 +146,13 @@ export class PairingHeap<TItem> {
       this._root = collapse(node.child, this._lessThanFunc)
     }
     else {
+      if (node.prev == null) {
+        if (this._objectPool) {
+          throw new Error(`The node is already deleted. Don't use the objectPool to prevent this error.`)
+        }
+        // already deleted
+        return
+      }
       if (node.prev.child === node) {
         node.prev.child = node.next
       }

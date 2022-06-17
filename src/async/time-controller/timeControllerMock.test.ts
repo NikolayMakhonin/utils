@@ -68,7 +68,7 @@ describe('time-controller > timeControllerMock', function () {
     return timeMax + postDelay
   }
 
-  const _testVariants = createTestVariantsSync(({
+  const testVariants = createTestVariantsSync(({
     times,
     step1,
     step2,
@@ -100,13 +100,13 @@ describe('time-controller > timeControllerMock', function () {
       expectedTime -= step
       timeController.addTime(step)
     }
-    timeController.addTime(expectedTime)
+    timeController.addTime(Math.max(0, expectedTime))
     
     // console.log(result)
     assert.deepStrictEqual(result, expectedResult)
   })
-    
-  const testVariants = createTestVariantsSync(({
+  
+  function createTimes({
     time1Start,
     time1Timeout,
     time1Abort,
@@ -126,26 +126,45 @@ describe('time-controller > timeControllerMock', function () {
     time3Start: number|null,
     time3Timeout: number|null,
     time3Abort: number|null,
-  }) => {
-    const times: {index: number, start: number|null, timeout: number, abort: number|null}[] = [
-      [time1Start, time1Timeout, time1Abort],
-      [time2Start, time2Timeout, time2Abort],
-      [time3Start, time3Timeout, time3Abort],
-    ]
-      .filter(o => o[1] != null)
-      .map(([start, timeout, abort], index) => {
-        return {
-          index,
-          start,
-          timeout,
-          abort,
-        }
+  }): [{index: number, start: number|null, timeout: number, abort: number|null}[]] {
+    const times = []
+    let index = 0
+    if (time1Timeout != null) {
+      times.push({
+        index,
+        start  : time1Start,
+        timeout: time1Timeout,
+        abort  : time1Abort,
       })
-
-    if (times.length === 0) {
-      return
+      index++
     }
-
+    if (time2Timeout != null) {
+      times.push({
+        index,
+        start  : time2Start,
+        timeout: time2Timeout,
+        abort  : time2Abort,
+      })
+      index++
+    }
+    if (time3Timeout != null) {
+      times.push({
+        index,
+        start  : time3Start,
+        timeout: time3Timeout,
+        abort  : time3Abort,
+      })
+      index++
+    }
+    
+    return [times]
+  }
+  
+  function createExpectedResult({
+    times,
+  }: {
+    times: {index: number, start: number|null, timeout: number, abort: number|null}[],
+  }) {
     const events = []
     times.forEach(time => {
       if (time.abort != null && time.abort < 0) {
@@ -181,25 +200,45 @@ describe('time-controller > timeControllerMock', function () {
       throw new Error('Unexpected behavior')
     })
     const expectedResult = events.map(o => o.event)
-
-    // const expectedResult = await new Promise<string[]>((resolve, reject) => {
-    //   test({
-    //     timeController: timeControllerDefault,
-    //     times,
-    //     postDelay     : 300,
-    //     resolve,
-    //   })
-    // })
-
-    _testVariants({
-      times         : [times],
-      step1         : [null, 0, 1, 2],
-      step2         : [null, 0, 1, 2],
-      step3         : [null, 0, 1, 2],
-      expectedResult: [expectedResult],
+    
+    return [expectedResult]
+  }
+    
+  const testVariantsExpectedResult = createTestVariants(async ({
+    time1Start,
+    time1Timeout,
+    time1Abort,
+    time2Start,
+    time2Timeout,
+    time2Abort,
+    time3Start,
+    time3Timeout,
+    time3Abort,
+    times,
+    expectedResult,
+  }: {
+    time1Start: number|null,
+    time1Timeout: number|null,
+    time1Abort: number|null,
+    time2Start: number|null,
+    time2Timeout: number|null,
+    time2Abort: number|null,
+    time3Start: number|null,
+    time3Timeout: number|null,
+    time3Abort: number|null,
+    times: {index: number, start: number|null, timeout: number, abort: number|null}[],
+    expectedResult: string[],
+  }) => {
+    const result = await new Promise<string[]>((resolve, reject) => {
+      test({
+        timeController: timeControllerDefault,
+        times,
+        postDelay     : 300,
+        resolve,
+      })
     })
 
-    // assert.deepStrictEqual(_expectedResult, expectedResult)
+    assert.deepStrictEqual(result, expectedResult)
   })
 
   it('setTimeout order', async function () {
@@ -217,45 +256,78 @@ describe('time-controller > timeControllerMock', function () {
     }
   })
 
-  xit('custom 1', async function () {
-    await testVariants({
-      time1Start  : [0],
-      time1Timeout: [0],
-      time1Abort  : [null],
-      time2Start  : [null],
-      time2Timeout: [4],
-      time2Abort  : [null],
-      time3Start  : [null],
-      time3Timeout: [null],
-      time3Abort  : [null],
+  xit('custom 1', function () {
+    testVariants({
+      time1Start    : [0],
+      time1Timeout  : [0],
+      time1Abort    : [null],
+      time2Start    : [null],
+      time2Timeout  : [4],
+      time2Abort    : [null],
+      time3Start    : [null],
+      time3Timeout  : [null],
+      time3Abort    : [null],
+      times         : createTimes,
+      expectedResult: createExpectedResult,
+      step1         : [null, 0, 1, 2],
+      step2         : [null, 0, 1, 2],
+      step3         : [null, 0, 1, 2],
     })
   })
 
-  it('custom 2', async function () {
-    await testVariants({
-      time3Start  : [null],
-      time3Timeout: [null],
-      time3Abort  : [null],
-      time2Start  : [null],
-      time2Timeout: [0],
-      time2Abort  : [50],
-      time1Start  : [0],
-      time1Timeout: [0],
-      time1Abort  : [null],
+  xit('custom 2', function () {
+    testVariants({
+      time3Start    : [null],
+      time3Timeout  : [null],
+      time3Abort    : [null],
+      time2Start    : [null],
+      time2Timeout  : [0],
+      time2Abort    : [50],
+      time1Start    : [0],
+      time1Timeout  : [0],
+      time1Abort    : [null],
+      times         : createTimes,
+      expectedResult: createExpectedResult,
+      step1         : [null, 0, 1, 2],
+      step2         : [null, 0, 1, 2],
+      step3         : [null, 0, 1, 2],
     })
+  })
+
+  it('expectedResult', async function () {
+    const iterations = await testVariantsExpectedResult({
+      time3Start    : [null, 0, 100, 200],
+      time3Timeout  : [null, 0, 100, 200],
+      time3Abort    : [null, -1, 0, 100, 200],
+      time2Start    : [null, 0, 100, 200],
+      time2Timeout  : [null, 0, 100, 200],
+      time2Abort    : [null, -1, 0, 100, 200],
+      time1Start    : [null, 0, 100, 200],
+      time1Timeout  : [null, 0, 100, 200],
+      time1Abort    : [null, -1, 0, 100, 200],
+      times         : createTimes,
+      expectedResult: createExpectedResult,
+    })
+
+    console.log('iterations: ' + iterations)
   })
 
   it('base', function () {
     const iterations = testVariants({
-      time3Start  : [null, 0, 1, 2],
-      time3Timeout: [null, 0, 1, 2],
-      time3Abort  : [null, -1, 0, 1, 2],
-      time2Start  : [null, 0, 1, 2],
-      time2Timeout: [null, 0, 1, 2],
-      time2Abort  : [null, -1, 0, 1, 2],
-      time1Start  : [null, 0, 1, 2],
-      time1Timeout: [null, 0, 1, 2],
-      time1Abort  : [null, -1, 0, 1, 2],
+      time3Start    : [null, 0, 1, 2],
+      time3Timeout  : [null, 0, 1, 2],
+      time3Abort    : [null, -1, 0, 1, 2],
+      time2Start    : [null, 0, 1, 2],
+      time2Timeout  : [null, 0, 1, 2],
+      time2Abort    : [null, -1, 0, 1, 2],
+      time1Start    : [null, 0, 1, 2],
+      time1Timeout  : [null, 0, 1, 2],
+      time1Abort    : [null, -1, 0, 1, 2],
+      times         : createTimes,
+      expectedResult: createExpectedResult,
+      step1         : [null, 0, 1, 2],
+      step2         : [null, 0, 1, 2],
+      step3         : [null, 0, 1, 2],
     })
 
     console.log('iterations: ' + iterations)
