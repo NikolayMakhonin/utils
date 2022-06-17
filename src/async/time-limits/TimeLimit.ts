@@ -4,24 +4,27 @@ import {PriorityQueue} from 'src/async/priority-queue'
 import {Priority} from 'src/sync/priority'
 import {IAbortSignalFast} from '@flemist/abort-controller-fast'
 import {promiseToAbortable} from 'src/async/abort-controller-fast-utils'
+import {ITimeController} from '../time-controller/contracts'
+import {timeControllerDefault} from '../time-controller/timeControllerDefault'
 
 export class TimeLimit implements ITimeLimit {
+  private readonly _timeController: ITimeController
   private readonly _maxCount: number
   private readonly _timeMs: number
   private readonly _priorityQueue: PriorityQueue
-  private readonly _setTimeout: (func: () => void, timeout?: number) => void
 
   constructor({
     maxCount,
     timeMs,
     priorityQueue,
-    setTimeout,
+    timeController,
   }: {
     maxCount: number,
     timeMs: number,
     priorityQueue?: PriorityQueue,
-    setTimeout?: (func: () => void, timeout?: number) => void,
+    timeController?: ITimeController,
   }) {
+    this._timeController = timeController || timeControllerDefault
     this._maxCount = maxCount
     this._timeMs = timeMs
     this._priorityQueue = priorityQueue
@@ -75,7 +78,7 @@ export class TimeLimit implements ITimeLimit {
       return result
     }
     finally {
-      this._setTimeout(this._releaseFunc, this._timeMs)
+      this._timeController.setTimeout(this._releaseFunc, this._timeMs)
     }
   }
 }
