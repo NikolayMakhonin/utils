@@ -427,7 +427,7 @@ describe('thenable-sync > ThenableSync', function () {
     console.log('iterations: ' + iterations)
   })
 
-  it('million promises', async function () {
+  xit('million promises', async function () {
     const promises: Promise<any>[] = []
     for (let i = 0; i < 1000000; i++) {
       promises.push(new Promise(() => {}).then(() => {
