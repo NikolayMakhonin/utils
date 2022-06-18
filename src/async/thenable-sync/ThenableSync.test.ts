@@ -13,7 +13,16 @@ enum AsyncType {
   PromiseError = 'PromiseError',
 }
 
-const allAsyncTypes = Object.values(AsyncType)
+// const asyncTypesValues = Object.values(AsyncType)
+const asyncTypesValues = [
+  AsyncType.Value,
+  AsyncType.ThenableSync,
+  // AsyncType.Iterator,
+  // AsyncType.Promise,
+  AsyncType.ThenableSyncError,
+  // AsyncType.IteratorError,
+  // AsyncType.PromiseError,
+]
 
 function asyncTypeIsError(type: AsyncType) {
   switch (type) {
@@ -259,7 +268,7 @@ describe('thenable-sync > ThenableSync', function () {
   }) => {
     const errors: Error[] = []
     function catchError<TFunc extends (this: any, ...args: any[]) => any>(func: TFunc): TFunc {
-      return function func() {
+      return function _catchError() {
         try {
           return func.apply(this, arguments)
         }
@@ -277,20 +286,31 @@ describe('thenable-sync > ThenableSync', function () {
 
     assert.ok(!isPromise(inputValue))
 
+    if (!hasOnfulfilled) {
+      assert.strictEqual(onfulfilledAsyncType1, AsyncType.Value)
+      assert.strictEqual(onfulfilledAsyncType2, AsyncType.Value)
+    }
+
+    if (!hasOnrejected) {
+      assert.strictEqual(onrejectedAsyncType1, AsyncType.Value)
+      assert.strictEqual(onrejectedAsyncType2, AsyncType.Value)
+    }
+
     const inputHasError = isError || asyncTypeIsError(inputAsyncType1) || asyncTypeIsError(inputAsyncType2)
     const resultHasError = inputHasError
-      || asyncTypeIsError(onfulfilledAsyncType1) || asyncTypeIsError(onfulfilledAsyncType2)
+      ? !hasOnrejected || asyncTypeIsError(onrejectedAsyncType1) || asyncTypeIsError(onrejectedAsyncType2)
+      : hasOnfulfilled && (asyncTypeIsError(onfulfilledAsyncType1) || asyncTypeIsError(onfulfilledAsyncType2))
 
     const hasPromise = asyncTypeIsPromise(inputAsyncType1) || asyncTypeIsPromise(inputAsyncType2)
       || asyncTypeIsPromise(onfulfilledAsyncType1) || asyncTypeIsPromise(onfulfilledAsyncType2)
-      || resultHasError && dontThrowOnImmediateError
 
     const customResolveValue: TResolveAsyncValue = !hasCustomResolveValue
       ? void 0
       : catchError((value) => {
-        assert.ok(value instanceof CustomValue)
-        assert.ok(value.type === 'value')
-        return value.value
+        if (value instanceof CustomValue && value.type === 'value') {
+          return value.value
+        }
+        return value
       })
 
     const onfulfilled: TOnFulfilled = !hasOnfulfilled
@@ -298,7 +318,7 @@ describe('thenable-sync > ThenableSync', function () {
       : catchError((value) => {
         assert.ok(!inputHasError)
         assert.ok(value instanceof CustomValue)
-        assert.ok(value.type === 'onfulfilled')
+        assert.strictEqual(value.type, 'onfulfilled')
         value = value.value
         return createAsyncValue(value, hasCustomResolveValue, onfulfilledAsyncType1, onfulfilledAsyncType2)
       })
@@ -306,21 +326,22 @@ describe('thenable-sync > ThenableSync', function () {
     const onrejected: TOnRejected = !hasOnrejected
       ? void 0
       : catchError((value) => {
-        assert.ok(resultHasError)
+        assert.ok(inputHasError)
         assert.ok(value instanceof CustomValue)
-        assert.ok(value.type === 'onrejected')
+        assert.strictEqual(value.type, 'onrejected')
         value = value.value
         return createAsyncValue(value, hasCustomResolveValue, onrejectedAsyncType1, onrejectedAsyncType2)
       })
 
-    let input = createAsyncValue(inputValue, hasCustomResolveValue, inputAsyncType1, inputAsyncType2)
-
+    let _inputValue = inputValue
     if (hasOnfulfilled && !inputHasError) {
-      input = new CustomValue('onfulfilled', input)
+      _inputValue = new CustomValue('onfulfilled', _inputValue)
     }
     if (hasOnrejected && inputHasError) {
-      input = new CustomValue('onrejected', input)
+      _inputValue = new CustomValue('onrejected', _inputValue)
     }
+    let input = createAsyncValue(_inputValue, hasCustomResolveValue, inputAsyncType1, inputAsyncType2)
+
 
     let result: ThenableOrValue<any>
     try {
@@ -356,28 +377,41 @@ describe('thenable-sync > ThenableSync', function () {
         result = err
       }
       throwIfError()
+    } else if (resultHasError && dontThrowOnImmediateError) {
+      assert.ok(result instanceof ThenableSync)
+      try {
+        resolveAsync(result)
+        errors.push(new Error('result should throw error'))
+      }
+      catch (err) {
+        result = err
+      }
     }
+
+    throwIfError()
 
     assert.ok(!isPromise(result))
     assert.deepStrictEqual(result, inputValue)
   })
   
   it('resolveAsync', async function () {
-    await testVariants({
-      dontThrowOnImmediateError: [false, true],
+    const iterations = await testVariants({
       hasCustomResolveValue    : [false, true],
+      dontThrowOnImmediateError: [false, true],
       isError                  : [false, true],
       inputValue               : [0, void 0, null, 1, '0', { a: 1 }, Symbol('sym')],
-      inputAsyncType1          : allAsyncTypes,
-      inputAsyncType2          : allAsyncTypes,
+      inputAsyncType1          : asyncTypesValues,
+      inputAsyncType2          : asyncTypesValues,
 
       hasOnfulfilled       : [false, true],
-      onfulfilledAsyncType1: allAsyncTypes,
-      onfulfilledAsyncType2: allAsyncTypes,
+      onfulfilledAsyncType1: ({hasOnfulfilled}) => !hasOnfulfilled ? [AsyncType.Value] : asyncTypesValues,
+      onfulfilledAsyncType2: ({hasOnfulfilled}) => !hasOnfulfilled ? [AsyncType.Value] : asyncTypesValues,
 
       hasOnrejected       : [false, true],
-      onrejectedAsyncType1: allAsyncTypes,
-      onrejectedAsyncType2: allAsyncTypes,
+      onrejectedAsyncType1: ({hasOnrejected}) => !hasOnrejected ? [AsyncType.Value] : asyncTypesValues,
+      onrejectedAsyncType2: ({hasOnrejected}) => !hasOnrejected ? [AsyncType.Value] : asyncTypesValues,
     })
+
+    console.log('iterations: ' + iterations)
   })
 })
