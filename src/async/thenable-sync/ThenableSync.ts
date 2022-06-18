@@ -59,7 +59,12 @@ export class ThenableSync<TValue = any> implements IThenable<TValue> {
 
     if (executor) {
       try {
-        executor(this.resolve.bind(this), this.reject.bind(this))
+        const _this = this
+        executor(function resolve() {
+          _this.resolve.apply(_this, arguments)
+        }, function reject() {
+          _this.reject.apply(_this, arguments)
+        })
       }
       catch (err) {
         this.reject(err)

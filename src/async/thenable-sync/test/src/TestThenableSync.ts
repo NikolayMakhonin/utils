@@ -284,14 +284,17 @@ function createThen(
     switch (result) {
       case ResolveResult.Immediate:
         assert.strictEqual(isRejected, false)
+        assert.ok(false)
         break
       case ResolveResult.ImmediateError:
         assert.strictEqual(isRejected, true)
+        assert.ok(false)
         break
       case ResolveResult.Deferred:
         break
       case ResolveResult.DeferredError:
         assert.strictEqual(isRejected, true)
+        assert.ok(false)
         break
       default:
         throw new Error(`Unknown ResolveResult: ${result}`)
@@ -561,12 +564,13 @@ export class TestThenableSync extends TestVariants<
 
         if (options.expected.error) {
           assert.throws(action, options.expected.error as TClass<Error>|Array<TClass<Error>>)
+          assert.ok(false)
         }
         else {
           action()
         }
 
-        assert.assertNotHandledErrors()
+        // assert.assertNotHandledErrors()
 
         break
       }
