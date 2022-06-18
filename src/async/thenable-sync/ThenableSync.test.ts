@@ -17,10 +17,10 @@ enum AsyncType {
 const asyncTypesValues = [
   AsyncType.Value,
   AsyncType.ThenableSync,
-  // AsyncType.Iterator,
+  AsyncType.Iterator,
   AsyncType.Promise,
   AsyncType.ThenableSyncError,
-  // AsyncType.IteratorError,
+  AsyncType.IteratorError,
   AsyncType.PromiseError,
 ]
 
@@ -88,13 +88,13 @@ function createAsyncValue(value: any, isCustomValue: boolean, ...asyncTypes: Asy
         break
 
       case AsyncType.Iterator:
-        value = ((_value) => function *iterator() {
+        value = (function *iterator(_value) {
           const result = yield _value
           return result
         })(value)
         break
       case AsyncType.IteratorError:
-        value = ((_value) => function *iterator() {
+        value = (function *iterator(_value) {
           const result = yield _value
           throw result
         })(value)
@@ -118,6 +118,8 @@ function createAsyncValue(value: any, isCustomValue: boolean, ...asyncTypes: Asy
 }
 
 describe('thenable-sync > ThenableSync', function () {
+  this.timeout(6000000)
+
   // let valueId: number = 0
   // function getValueSimple(type: ValueType) {
   //   valueId++
@@ -235,7 +237,7 @@ describe('thenable-sync > ThenableSync', function () {
   //   }
   // }
 
-  const testVariants = createTestVariants(async ({
+  const testVariants = createTestVariants(({
     dontThrowOnImmediateError,
     hasCustomResolveValue,
     isError,
@@ -368,20 +370,7 @@ describe('thenable-sync > ThenableSync', function () {
     }
     throwIfError()
 
-    if (hasPromise) {
-      assert.ok(result instanceof ThenableSync)
-      try {
-        result = await result
-      }
-      catch (err) {
-        throwIfError()
-        if (!resultHasError) {
-          throw err
-        }
-        result = err
-      }
-      throwIfError()
-    } else if (resultHasError && dontThrowOnImmediateError) {
+    if (!hasPromise && resultHasError && dontThrowOnImmediateError) {
       assert.ok(result instanceof ThenableSync)
       try {
         resolveAsync(result)
@@ -392,10 +381,29 @@ describe('thenable-sync > ThenableSync', function () {
       }
     }
 
-    throwIfError()
+    function onEnd() {
+      throwIfError()
+      assert.ok(!isPromise(result))
+      assert.deepStrictEqual(result, inputValue)
+    }
 
-    assert.ok(!isPromise(result))
-    assert.deepStrictEqual(result, inputValue)
+    if (hasPromise) {
+      assert.ok(result instanceof ThenableSync)
+      return (async () => {
+        try {
+          result = await result
+        } catch (err) {
+          throwIfError()
+          if (!resultHasError) {
+            throw err
+          }
+          result = err
+        }
+        onEnd()
+      })()
+    } else {
+      onEnd()
+    }
   })
   
   it('resolveAsync', async function () {
@@ -417,5 +425,16 @@ describe('thenable-sync > ThenableSync', function () {
     })
 
     console.log('iterations: ' + iterations)
+  })
+
+  it('million promises', async function () {
+    const promises: Promise<any>[] = []
+    for (let i = 0; i < 1000000; i++) {
+      promises.push(new Promise(() => {}).then(() => {
+        console.log('wer')
+      }))
+    }
+
+    // await Promise.all(promises)
   })
 })
