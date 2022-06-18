@@ -18,10 +18,10 @@ const asyncTypesValues = [
   AsyncType.Value,
   AsyncType.ThenableSync,
   // AsyncType.Iterator,
-  // AsyncType.Promise,
+  AsyncType.Promise,
   AsyncType.ThenableSyncError,
   // AsyncType.IteratorError,
-  // AsyncType.PromiseError,
+  AsyncType.PromiseError,
 ]
 
 function asyncTypeIsError(type: AsyncType) {
@@ -302,7 +302,11 @@ describe('thenable-sync > ThenableSync', function () {
       : hasOnfulfilled && (asyncTypeIsError(onfulfilledAsyncType1) || asyncTypeIsError(onfulfilledAsyncType2))
 
     const hasPromise = asyncTypeIsPromise(inputAsyncType1) || asyncTypeIsPromise(inputAsyncType2)
-      || asyncTypeIsPromise(onfulfilledAsyncType1) || asyncTypeIsPromise(onfulfilledAsyncType2)
+      || (
+        inputHasError
+          ? hasOnrejected && (asyncTypeIsPromise(onrejectedAsyncType1) || asyncTypeIsPromise(onrejectedAsyncType2))
+          : hasOnfulfilled && (asyncTypeIsPromise(onfulfilledAsyncType1) || asyncTypeIsPromise(onfulfilledAsyncType2))
+      )
 
     const customResolveValue: TResolveAsyncValue = !hasCustomResolveValue
       ? void 0
@@ -365,7 +369,7 @@ describe('thenable-sync > ThenableSync', function () {
     throwIfError()
 
     if (hasPromise) {
-      assert.ok(isPromise(result))
+      assert.ok(result instanceof ThenableSync)
       try {
         result = await result
       }

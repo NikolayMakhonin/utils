@@ -453,7 +453,9 @@ function _resolveAsync<TValue = any, TResult1 = TValue, TResult2 = never>(
     if (handler) {
       isError = false
       if ((resolveValueFunc<TResult1|TResult2>(
-        () => handler(o),
+        () => {
+          return handler(o)
+        },
         (o2, e2) => {
           onResult(o2 as TResult1, e2)
         },
