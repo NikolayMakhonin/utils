@@ -1,43 +1,43 @@
 /* eslint-disable */
 import {calcPerformanceAsync} from '../calc-perfoemance-async/calcPerformanceAsync'
-import {resolveAsync} from "./ThenableSync";
+import {resolveAsync, ThenableSync} from "./ThenableSync";
 
 describe('thenable-sync > ThenableSync perf', function () {
   this.timeout(600000)
 
   it('base', async function () {
+    const thenableSync = ThenableSync.createResolved('thenableSync')
     function *funcGenerator() {
-      for (let i = 0; i < 2; i++) {
-        yield i
-      }
+      // for (let i = 0; i < 20; i++) {
+      //   yield thenableSync
+      // }
+      return thenableSync
     }
-    function iterate() {
-      for (const item of funcGenerator()) {
-
-      }
-    }
-    function thenableSync() {
+    function runThenableSync() {
       return resolveAsync(funcGenerator())
     }
-    async function funcAsync() {
-      for (let i = 0; i < 2; i++) {
-        await i
-      }
+
+    const promise = Promise.resolve('promise')
+    async function runPromise() {
+      // for (let i = 0; i < 20; i++) {
+      //   await promise
+      // }
+      return promise
     }
+
+    assert.strictEqual(await runThenableSync(), 'thenableSync')
+    assert.strictEqual(await runPromise(), 'promise')
 
     let result = await calcPerformanceAsync(
       10000,
       () => {
 
       },
-      // () => {
-      //   iterate()
-      // },
       () => {
-        return thenableSync()
+        return runThenableSync()
       },
       () => {
-        return funcAsync()
+        return runPromise()
       },
     )
     
