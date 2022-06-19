@@ -10,7 +10,7 @@ specifiers:
   '@flemist/abort-controller-fast': ^0.0.0
   '@flemist/copy-glob-flat': ^0.0.5
   '@flemist/karma-custom-launcher': ^0.0.0
-  '@flemist/test-variants': ^0.0.2
+  '@flemist/test-variants': ^0.0.3
   '@rollup/plugin-alias': ^3.1.9
   '@rollup/plugin-babel': ^5.3.1
   '@rollup/plugin-commonjs': ^22.0.0
@@ -64,7 +64,7 @@ devDependencies:
   '@babel/runtime-corejs3': 7.18.3
   '@flemist/copy-glob-flat': 0.0.5
   '@flemist/karma-custom-launcher': 0.0.0
-  '@flemist/test-variants': 0.0.2
+  '@flemist/test-variants': 0.0.3
   '@rollup/plugin-alias': 3.1.9_rollup@2.75.6
   '@rollup/plugin-babel': 5.3.1_zlefvkjd3mp2eij3mw2gs4aqfm
   '@rollup/plugin-commonjs': 22.0.0_rollup@2.75.6
@@ -1318,8 +1318,8 @@ packages:
       tslib: 2.4.0
     dev: true
 
-  /@flemist/test-variants/0.0.2:
-    resolution: {integrity: sha512-N8oLERSbqgKmPSWaz8A3We7OG3S4XMrHBfP/O+gzMcqRgH7zj0dQo6LU7U5pCUX3naM7phJqA9n+mUA5oBrMlg==}
+  /@flemist/test-variants/0.0.3:
+    resolution: {integrity: sha512-Bl1B29HYORTREnVvfKX5jK24sCSA+klKTldTu25kstiYAveRq2rK8cfjiP8q0wiIb2CiSu/yzgIWQ6t2GtOJrw==}
     engines: {node: '>=9.3.0', pnpm: ^7.1.6}
     dependencies:
       tslib: 2.4.0
