@@ -10,7 +10,7 @@ module.exports = function (config) {
     browserSocketTimeout    : 30 * 1000,
     captureTimeout          : 60 * 1000,
     processKillTimeout      : 30 * 1000,
-    pingTimeout             : 30 * 1000,
+    pingTimeout             : 15 * 60 * 1000,
 
     browsers: process.env.GITHUB_WORKFLOW
       ? (
