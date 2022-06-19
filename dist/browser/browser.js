@@ -24,8 +24,8 @@ item:t
 },t.prototype.getMin=function(){var t=this._root
 ;return null==t?void 0:t.item
 },t.prototype.deleteMin=function(){
-var t=this._root,e=null==t?void 0:t.item
-;return this.delete(t),e
+var t=this._root;if(null!=t){var e=t.item
+;return this.delete(t),e}
 },t.prototype.delete=function(t){var e
 ;if(t===this._root)this._root=o(t.child,this._lessThanFunc);else{
 if(null==t.prev){

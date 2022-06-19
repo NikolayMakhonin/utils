@@ -83,9 +83,10 @@ class PairingHeap {
        */
     deleteMin() {
         const { _root } = this;
-        const result = _root == null
-            ? void 0
-            : _root.item;
+        if (_root == null) {
+            return void 0;
+        }
+        const result = _root.item;
         this.delete(_root);
         return result;
     }
