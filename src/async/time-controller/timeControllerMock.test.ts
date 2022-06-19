@@ -249,7 +249,7 @@ describe('time-controller > timeControllerMock', function () {
     console.log(`${time3Start}, ${time3Timeout}, ${time3Abort}, ${time2Start}, ${time2Timeout}, ${time2Abort}, ${time1Start}, ${time1Timeout}, ${time1Abort}`)
   })
 
-  it('setTimeout order', async function () {
+  xit('setTimeout order', async function () {
     const result: number[] = []
     for (let i = 0; i < 100; i++) {
       setTimeout(() => result.push(4), 3)
