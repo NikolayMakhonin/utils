@@ -29,6 +29,11 @@
       "DOM",
       "ESNext"
     ],
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "src/*": [
+        "src/*"
+      ]
+    }
   }
 }

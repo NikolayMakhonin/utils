@@ -3,14 +3,14 @@ import {TimeControllerMock} from './timeControllerMock'
 import {ITimeController} from './contracts'
 import {timeControllerDefault} from './timeControllerDefault'
 import {delay} from '../delay'
-import {
-  setProcessPriority,
-  setThreadPriority,
-  PROCESS_PRIORITY_REALTIME,
-  THREAD_PRIORITY_REALTIME,
-} from 'rdtsc'
+// import {
+//   setProcessPriority,
+//   setThreadPriority,
+//   PROCESS_PRIORITY_REALTIME,
+//   THREAD_PRIORITY_REALTIME,
+// } from 'rdtsc'
 
-describe('time-controller > timeControllerMock', function () {
+xdescribe('time-controller > timeControllerMock', function () {
   function test({
     timeController,
     times,
@@ -305,8 +305,8 @@ describe('time-controller > timeControllerMock', function () {
   xit('expectedResult', async function () {
     this.timeout(600000000)
 
-    setProcessPriority(PROCESS_PRIORITY_REALTIME)
-    setThreadPriority(THREAD_PRIORITY_REALTIME)
+    // setProcessPriority(PROCESS_PRIORITY_REALTIME)
+    // setThreadPriority(THREAD_PRIORITY_REALTIME)
 
     const iterations = await testVariantsExpectedResult({
       time3Timeout: [null, 0, 170],

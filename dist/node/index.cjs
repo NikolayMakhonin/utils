@@ -11,6 +11,7 @@ var delay = require('./delay.cjs');
 var PriorityQueue = require('./PriorityQueue.cjs');
 var TimeLimit = require('./TimeLimit.cjs');
 var TimeLimits = require('./TimeLimits.cjs');
+require('./timeControllerDefault.cjs');
 require('tslib');
 
 

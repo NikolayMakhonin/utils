@@ -3,7 +3,7 @@ import {TestThenableSync, ValueType} from './TestThenableSync'
 
 declare const after
 
-describe('common > main > helpers > ThenableSync', function () {
+describe('thenable-sync > ThenableSync', function () {
   this.timeout(120000)
 
   const testThenableSync = TestThenableSync.test

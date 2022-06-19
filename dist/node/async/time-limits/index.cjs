@@ -7,6 +7,7 @@ var TimeLimits = require('../../TimeLimits.cjs');
 require('tslib');
 require('../../CustomPromise.cjs');
 require('../../promiseToAbortable.cjs');
+require('../../timeControllerDefault.cjs');
 
 
 
