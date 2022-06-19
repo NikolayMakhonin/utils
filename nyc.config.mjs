@@ -1,5 +1,5 @@
 export default {
-  include     : ['**/*'],
+  include     : ['src/**/*.ts'],
   exclude     : ['**/test/**', '**/*.{test,perf}.*'],
   reporter    : ['lcov'],
   // reporter    : ['json'],
