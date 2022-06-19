@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-loop-func */
 import {
   isThenable, ResolveResult, resolveValue,
   ThenableIterator,
@@ -49,7 +50,7 @@ export interface IThenableSyncOptionsVariant {
 interface IThenableSyncExpected {
   error?: TClass<Error>|Array<TClass<Error>>
     |((variant: IThenableSyncOptionsVariant) => TClass<Error>|Array<TClass<Error>>)
-  value?: any|((variant: IThenableSyncOptionsVariant) => any)
+  value?: any // |((variant: IThenableSyncOptionsVariant) => any)
 }
 
 interface IThenableSyncOptionsVariants extends IOptionsVariants {

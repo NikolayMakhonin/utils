@@ -57,7 +57,8 @@ describe('pairing-heap > PairingHeap', function () {
       for (let i = 0; i < itemsSorted.length; i++) {
         if (itemsSorted[i] % 2 === 0) {
           // itemsSorted[i] += 3
-        } else {
+        }
+        else {
           itemsSorted[i] -= 3
         }
       }
@@ -83,7 +84,8 @@ describe('pairing-heap > PairingHeap', function () {
         if (decreaseKey) {
           if (items[i] % 2 === 0) {
             // node.item += 3
-          } else {
+          }
+          else {
             node.item -= 3
           }
           heap.decreaseKey(node)
@@ -122,7 +124,8 @@ describe('pairing-heap > PairingHeap', function () {
         if (decreaseKey) {
           if (items[i] % 2 === 0) {
             // node.item += 3
-          } else {
+          }
+          else {
             node.item -= 3
           }
           heap.decreaseKey(node)

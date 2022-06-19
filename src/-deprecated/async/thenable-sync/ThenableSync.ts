@@ -179,7 +179,7 @@ export class ThenableSync<TValue = any> implements IThenable<TValue> {
       this._onfulfilled = void 0
       this._onrejected = void 0
       for (let i = 0, len = _onrejected.length; i < len; i++) {
-        _onrejected[i](error)
+        void _onrejected[i](error)
       }
     }
   }

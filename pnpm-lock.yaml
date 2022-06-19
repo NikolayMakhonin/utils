@@ -26,7 +26,7 @@ specifiers:
   '@types/node': ^18.0.0
   cpy-cli: ^4.1.0
   eslint: ^8.17.0
-  eslint-config-pro: ^3.0.12
+  eslint-config-pro: ^3.0.13
   fs-extra: ^10.1.0
   globby: ^11.1.0
   karma: ^6.4.0
@@ -80,7 +80,7 @@ devDependencies:
   '@types/node': 18.0.0
   cpy-cli: 4.1.0
   eslint: 8.17.0
-  eslint-config-pro: 3.0.12_ud6rd4xtew5bv4yhvkvu24pzm4
+  eslint-config-pro: 3.0.13_ud6rd4xtew5bv4yhvkvu24pzm4
   fs-extra: 10.1.0
   globby: 11.1.0
   karma: 6.4.0
@@ -2737,8 +2737,8 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
-  /eslint-config-pro/3.0.12_ud6rd4xtew5bv4yhvkvu24pzm4:
-    resolution: {integrity: sha512-E/Xf1jnA0FCT6dHHiPMv6zERwqBi6V3ysV5fzbBMdfTxCgFDUktwoMWxoT9cGxIMHfyLmGeCWAH30743iXsFzg==}
+  /eslint-config-pro/3.0.13_ud6rd4xtew5bv4yhvkvu24pzm4:
+    resolution: {integrity: sha512-q556H4kTD3WqvOLuiVPEB73VG7kqDKqInE2EDCzfaG/7j7XQsTpoSSENy558NpCeKWbdwNAp8k8eYXRpj1lSzg==}
     engines: {node: '>=9.3.0', pnpm: ^7.1.6}
     peerDependencies:
       eslint: '>=7.4.0'

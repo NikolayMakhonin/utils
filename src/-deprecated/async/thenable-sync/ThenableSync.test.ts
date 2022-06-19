@@ -392,7 +392,8 @@ describe('thenable-sync > ThenableSync', function () {
       return (async () => {
         try {
           result = await result
-        } catch (err) {
+        }
+        catch (err) {
           throwIfError()
           if (!resultHasError) {
             throw err
@@ -401,7 +402,8 @@ describe('thenable-sync > ThenableSync', function () {
         }
         onEnd()
       })()
-    } else {
+    }
+    else {
       onEnd()
     }
   })

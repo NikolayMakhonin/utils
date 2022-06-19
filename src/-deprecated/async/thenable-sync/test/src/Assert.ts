@@ -2,7 +2,7 @@ export type TClass<T> = new (...args: any[]) => T
 
 export const AssertionError = // typeof require === 'function'
 // eslint-disable-next-line global-require
-  //? require('assertion-error')
+// ? require('assertion-error')
 //   :
 class extends Error { }
 

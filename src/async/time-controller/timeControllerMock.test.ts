@@ -10,7 +10,7 @@ import {delay} from '../delay'
 //   THREAD_PRIORITY_REALTIME,
 // } from 'rdtsc'
 
-xdescribe('time-controller > timeControllerMock', function () {
+describe('time-controller > timeControllerMock', function () {
   function test({
     timeController,
     times,
@@ -262,44 +262,6 @@ xdescribe('time-controller > timeControllerMock', function () {
       assert.deepStrictEqual(result, [1, 2, 3, 4, 5, 6])
       result.length = 0
     }
-  })
-
-  xit('custom 1', function () {
-    testVariants({
-      time1Start    : [0],
-      time1Timeout  : [0],
-      time1Abort    : [null],
-      time2Start    : [null],
-      time2Timeout  : [4],
-      time2Abort    : [null],
-      time3Start    : [null],
-      time3Timeout  : [null],
-      time3Abort    : [null],
-      times         : createTimes,
-      expectedResult: createExpectedResult,
-      step1         : [null, 0, 1, 2],
-      step2         : [null, 0, 1, 2],
-      step3         : [null, 0, 1, 2],
-    })
-  })
-
-  xit('custom 2', function () {
-    testVariants({
-      time3Start    : [null],
-      time3Timeout  : [null],
-      time3Abort    : [null],
-      time2Start    : [null],
-      time2Timeout  : [0],
-      time2Abort    : [50],
-      time1Start    : [0],
-      time1Timeout  : [0],
-      time1Abort    : [null],
-      times         : createTimes,
-      expectedResult: createExpectedResult,
-      step1         : [null, 0, 1, 2],
-      step2         : [null, 0, 1, 2],
-      step3         : [null, 0, 1, 2],
-    })
   })
 
   xit('expectedResult', async function () {

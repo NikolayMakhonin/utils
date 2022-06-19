@@ -1,6 +1,5 @@
 import {ITimeController} from './contracts'
 import {PairingHeap, PairingNode} from 'src/sync/pairing-heap'
-import {IObjectPool} from '../../sync/object-pool'
 
 interface IHandle {
 	id: number,
