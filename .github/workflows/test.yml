@@ -22,7 +22,7 @@ jobs:
 
       - name: Check workflow config
         run: |
-          node -e "o=["COVERALLS_REPO_TOKEN"].filter(o=>!process.env[o]);o.length&&(console.log("You should set env variables: "+o.join(", ")),process.exit(1))"
+          node -e "o=['COVERALLS_REPO_TOKEN'].filter(o=>!process.env[o]);o.length&&(console.log('You should set env variables: '+o.join(', ')),process.exit(1))"
 
       - uses: actions/checkout@v2
 
