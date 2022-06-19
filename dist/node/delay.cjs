@@ -1,6 +1,8 @@
 'use strict';
 
-function delay(milliseconds, abortSignal) {
+var timeControllerDefault = require('./timeControllerDefault.cjs');
+
+function delay(milliseconds, abortSignal, timeController) {
     return new Promise((resolve, reject) => {
         if (abortSignal && abortSignal.aborted) {
             reject(abortSignal.reason);
@@ -13,10 +15,11 @@ function delay(milliseconds, abortSignal) {
             }
             resolve();
         }
-        const timer = setTimeout(onResolve, milliseconds);
+        const _timeController = timeController || timeControllerDefault.timeControllerDefault;
+        const handle = _timeController.setTimeout(onResolve, milliseconds);
         if (abortSignal) {
             unsubscribe = abortSignal.subscribe((reason) => {
-                clearTimeout(timer);
+                _timeController.clearTimeout(handle);
                 reject(reason);
             });
         }

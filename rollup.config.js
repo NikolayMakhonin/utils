@@ -150,6 +150,7 @@ const browserTestsConfig = {
     'src/test/show-useragent.ts',
     'src/test/register.ts',
     'src/**/*.test.ts',
+    '!**/-deprecated/**',
   ],
   output: {
     dir      : 'dist/browser',

@@ -1,61 +1,61 @@
 import {ITimeController} from './contracts'
+import {PairingHeap, PairingNode} from 'src/sync/pairing-heap'
 
-interface IHandler {
+interface IHandle {
 	id: number,
 	time: number,
-	handler: () => void,
+  callback: () => void,
 }
 
-function compareHandlers(o1: IHandler, o2: IHandler): number {
+function lessThanHandles(o1: IHandle, o2: IHandle): boolean {
   if (o1.time > o2.time) {
-    return 1
+    return false
   }
   if (o1.time < o2.time) {
-    return -1
+    return true
   }
   if (o1.id > o2.id) {
-    return 1
+    return false
   }
   if (o1.id < o2.id) {
-    return -1
+    return true
   }
 
-  throw new Error('Duplicate timing handlers')
+  return false
 }
 
-export class TimeControllerMock implements ITimeController {
-  private _handlers: IHandler[] = []
+export class TimeControllerMock implements ITimeController<PairingNode<IHandle>> {
+  private readonly _handles: PairingHeap<IHandle>
   private _now: number = 1
   private _nextId: number = 0
+
+  constructor() {
+    this._handles = new PairingHeap<IHandle>({
+      lessThanFunc: lessThanHandles,
+    })
+  }
 
   addTime(time: number) {
     this.setTime(this._now + time)
   }
 
   setTime(time: number) {
-    if (time <= 0) {
-      throw new Error(`time (${time} should be > 0)`)
+    const {_handles, _now: now} = this
+
+    if (time < this._now) {
+      throw new Error(`time (${time}) should be >= now (${now})`)
     }
-    const {_handlers, _now: now} = this
 
     while (true) {
-      let minHandler: IHandler
-      for (const id in _handlers) {
-        if (Object.prototype.hasOwnProperty.call(_handlers, id)) {
-          const handler = _handlers[id]
-          if (handler.time <= time && (!minHandler || compareHandlers(handler, minHandler) < 0)) {
-            minHandler = handler
-          }
-        }
-      }
+      const minHandle: IHandle = _handles.getMin()
 
-      if (!minHandler) {
+      if (!minHandle || minHandle.time > time) {
         break
       }
 
-      delete _handlers[minHandler.id]
-      this._now = minHandler.time
-      minHandler.handler()
+      this._handles.deleteMin()
+      this._now = minHandle.time
+      minHandle.callback()
     }
 
     this._now = time
@@ -65,17 +65,16 @@ export class TimeControllerMock implements ITimeController {
     return this._now
   }
 
-  setTimeout(handler: () => void, timeout: number): number {
-    const id = this._nextId++
-    this._handlers[id] = {
-      id,
+  setTimeout(callback: () => void, timeout: number): PairingNode<IHandle> {
+    const node = this._handles.add(Object.freeze({
+      id  : this._nextId++,
       time: this._now + timeout,
-      handler,
-    }
-    return id
+      callback,
+    }))
+    return node
   }
 
-  clearTimeout(handle: number) {
-    delete this._handlers[handle]
+  clearTimeout(handle: PairingNode<IHandle>) {
+    this._handles.delete(handle)
   }
 }

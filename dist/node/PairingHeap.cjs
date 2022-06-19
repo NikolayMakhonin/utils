@@ -83,9 +83,10 @@ class PairingHeap {
        */
     deleteMin() {
         const { _root } = this;
-        const result = _root == null
-            ? void 0
-            : _root.item;
+        if (_root == null) {
+            return void 0;
+        }
+        const result = _root.item;
         this.delete(_root);
         return result;
     }
@@ -104,6 +105,13 @@ class PairingHeap {
             this._root = collapse(node.child, this._lessThanFunc);
         }
         else {
+            if (node.prev == null) {
+                if (this._objectPool) {
+                    throw new Error(`The node is already deleted. Don't use the objectPool to prevent this error.`);
+                }
+                // already deleted
+                return;
+            }
             if (node.prev.child === node) {
                 node.prev.child = node.next;
             }

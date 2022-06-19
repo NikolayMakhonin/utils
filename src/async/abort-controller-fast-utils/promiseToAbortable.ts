@@ -15,12 +15,27 @@ export function promiseToAbortable<T>(promise: Promise<T>, abortSignal?: IAbortS
       resolve(value)
     }
 
+    let rejected: boolean
+    function onReject(value: T) {
+      if (rejected) {
+        return
+      }
+
+      rejected = true
+
+      if (unsubscribe) {
+        unsubscribe()
+      }
+
+      reject(value)
+    }
+
     promise
       .then(onResolve)
-      .catch(reject)
+      .catch(onReject)
 
     if (abortSignal) {
-      unsubscribe = abortSignal.subscribe(reject)
+      unsubscribe = abortSignal.subscribe(onReject)
     }
   })
 }

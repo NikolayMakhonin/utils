@@ -13,11 +13,22 @@ function promiseToAbortable(promise, abortSignal) {
             }
             resolve(value);
         }
+        let rejected;
+        function onReject(value) {
+            if (rejected) {
+                return;
+            }
+            rejected = true;
+            if (unsubscribe) {
+                unsubscribe();
+            }
+            reject(value);
+        }
         promise
             .then(onResolve)
-            .catch(reject);
+            .catch(onReject);
         if (abortSignal) {
-            unsubscribe = abortSignal.subscribe(reject);
+            unsubscribe = abortSignal.subscribe(onReject);
         }
     });
 }

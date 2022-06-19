@@ -3,11 +3,13 @@
 var tslib = require('tslib');
 var CustomPromise = require('./CustomPromise.cjs');
 var promiseToAbortable = require('./promiseToAbortable.cjs');
+var timeControllerDefault = require('./timeControllerDefault.cjs');
 
 class TimeLimit {
-    constructor({ maxCount, timeMs, priorityQueue, }) {
+    constructor({ maxCount, timeMs, priorityQueue, timeController, }) {
         this._activeCount = 0;
         this._tickPromise = new CustomPromise.CustomPromise();
+        this._timeController = timeController || timeControllerDefault.timeControllerDefault;
         this._maxCount = maxCount;
         this._timeMs = timeMs;
         this._priorityQueue = priorityQueue;
@@ -47,7 +49,7 @@ class TimeLimit {
                 return result;
             }
             finally {
-                setTimeout(this._releaseFunc, this._timeMs);
+                this._timeController.setTimeout(this._releaseFunc, this._timeMs);
             }
         });
     }

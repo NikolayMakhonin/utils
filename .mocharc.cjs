@@ -7,7 +7,7 @@ module.exports = {
     './src/test/register.ts',
   ],
   'watch-files': ['./src/**'],
-  ignore       : ['./**/*.d.ts'],
+  ignore       : ['./**/*.d.ts', './**/-deprecated/**'],
   'node-option': [
 
   ],
