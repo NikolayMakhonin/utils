@@ -1,5 +1,7 @@
 'use strict';
 
+const _setTimeout = setTimeout;
+const _clearTimeout = clearTimeout;
 const timeControllerDefault = {
     now: function now() {
         return Date.now();
@@ -7,12 +9,12 @@ const timeControllerDefault = {
     setTimeout: typeof window === 'undefined'
         ? setTimeout
         : function setTimeout() {
-            return setTimeout.apply(window, arguments);
+            return _setTimeout.apply(window, arguments);
         },
     clearTimeout: typeof window === 'undefined'
         ? clearTimeout
         : function clearTimeout() {
-            return clearTimeout.apply(window, arguments);
+            return _clearTimeout.apply(window, arguments);
         },
 };
 

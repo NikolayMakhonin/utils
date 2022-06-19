@@ -6,11 +6,11 @@ console.log('ENV_VARS', process.env)
 module.exports = function (config) {
   config.set({
     browserNoActivityTimeout: 15 * 60 * 1000, // test timeout
-    browserDisconnectTimeout: 10 * 1000,
+    browserDisconnectTimeout: 30 * 1000,
     browserSocketTimeout    : 30 * 1000,
     captureTimeout          : 60 * 1000,
-    processKillTimeout      : 10 * 1000,
-    pingTimeout             : 5 * 1000,
+    processKillTimeout      : 30 * 1000,
+    pingTimeout             : 30 * 1000,
 
     browsers: process.env.GITHUB_WORKFLOW
       ? (
