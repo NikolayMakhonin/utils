@@ -76,7 +76,7 @@
     "eslint": "8.18.0",
     "eslint-config-pro": "3.0.13",
     "fs-extra": "10.1.0",
-    "globby": "11.1.0",
+    "globby": "=11.1.0",
     "karma": "6.4.0",
     "karma-chrome-launcher": "3.1.1",
     "karma-coverage": "2.2.0",
@@ -99,7 +99,7 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@flemist/abort-controller-fast": "0.0.2",
+    "@flemist/abort-controller-fast": "^0.0.2",
     "tslib": "^2.4.0"
   }
 }
