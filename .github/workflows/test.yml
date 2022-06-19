@@ -21,7 +21,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Check workflow config
-        if: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        if: ${{ !secrets.COVERALLS_REPO_TOKEN }}
         run: |
           echo You should set secrets variable: COVERALLS_REPO_TOKEN
           exit 1
