@@ -60,7 +60,7 @@ describe('time-controller > timeControllerMock', function () {
 
     return timeMax + postDelay
   }
-  
+
   function createTimes({
     time1Start,
     time1Timeout,
@@ -111,7 +111,7 @@ describe('time-controller > timeControllerMock', function () {
       })
       index++
     }
-    
+
     return [times]
   }
 
@@ -161,7 +161,7 @@ describe('time-controller > timeControllerMock', function () {
     // console.log(result)
     assert.deepStrictEqual(result, expectedResult)
   })
-  
+
   function createExpectedResult({
     times,
   }: {
@@ -202,10 +202,10 @@ describe('time-controller > timeControllerMock', function () {
       throw new Error('Unexpected behavior')
     })
     const expectedResult = events.map(o => o.event)
-    
+
     return [expectedResult]
   }
-    
+
   const testVariantsExpectedResult = createTestVariants(async ({
     time1Start,
     time1Timeout,
@@ -297,15 +297,15 @@ describe('time-controller > timeControllerMock', function () {
       time3Timeout: [null, 0, 1, 2],
       time3Start  : ({time3Timeout}) => time3Timeout == null ? [null] : [null, 0, 1, 2],
       time3Abort  : ({time3Timeout}) => time3Timeout == null ? [null] : [null, -1, 0, 1, 2],
-      
+
       time2Timeout: [null, 0, 1, 2],
       time2Start  : ({time2Timeout}) => time2Timeout == null ? [null] : [null, 0, 1, 2],
       time2Abort  : ({time2Timeout}) => time2Timeout == null ? [null] : [null, -1, 0, 1, 2],
-      
+
       time1Timeout: [null, 0, 1, 2],
       time1Start  : ({time1Timeout}) => time1Timeout == null ? [null] : [null, 0, 1, 2],
       time1Abort  : ({time1Timeout}) => time1Timeout == null ? [null] : [null, -1, 0, 1, 2],
-      
+
       times         : createTimes,
       expectedResult: createExpectedResult,
       step1         : [null, 0, 1, 2],

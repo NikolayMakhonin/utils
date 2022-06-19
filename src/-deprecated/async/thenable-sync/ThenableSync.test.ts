@@ -407,7 +407,7 @@ describe('thenable-sync > ThenableSync', function () {
       onEnd()
     }
   })
-  
+
   it('resolveAsync', async function () {
     const iterations = await testVariants({
       hasCustomResolveValue    : [false, true],

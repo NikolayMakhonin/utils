@@ -3,7 +3,7 @@ import {PairingHeap, PairingNode, TLessThanFunc} from './PairingHeap'
 import {createTestVariantsSync} from '@flemist/test-variants'
 
 describe('pairing-heap > PairingHeap', function () {
-  this.timeout(6000000)
+  this.timeout(120000)
 
   const testVariants = createTestVariantsSync(({
     decreaseKey,
@@ -35,7 +35,7 @@ describe('pairing-heap > PairingHeap', function () {
     let iterations = 1
     for (let i = 0; i < count; i++) {
       items[i] = i
-      if (i < 7) {
+      if (i < 6) {
         iterations *= i + 1
       }
     }
@@ -142,12 +142,12 @@ describe('pairing-heap > PairingHeap', function () {
         const valueMin = heap.getMin()
         resultItems.push(valueMin)
         // assert.strictEqual(valueMin, itemsSorted[i])
-        
+
         assert.strictEqual(heap.size, items.length - i)
         assert.strictEqual(heap.isEmpty, false)
-        
+
         const valueDeleted = heap.deleteMin()
-        
+
         assert.strictEqual(valueDeleted, valueMin)
         assert.strictEqual(heap.size, items.length - i - 1)
         assert.strictEqual(heap.isEmpty, i === items.length - 1)

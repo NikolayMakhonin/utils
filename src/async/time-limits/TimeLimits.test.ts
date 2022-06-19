@@ -84,7 +84,7 @@ describe('time-limits > TimeLimits', function () {
       }
 
       await delay(1)
-      
+
       if (mode === 'async' || mode === 'random') {
         timeController.addTime(asyncTime)
       }

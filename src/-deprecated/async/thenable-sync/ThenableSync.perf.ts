@@ -1,5 +1,5 @@
 /* eslint-disable */
-import {calcPerformanceAsync} from '../../../test/calcPerformanceAsync'
+import {calcPerformanceAsync} from 'src/test/calcPerformanceAsync'
 import {resolveAsync, ThenableSync} from "./ThenableSync";
 
 describe('thenable-sync > ThenableSync perf', function () {
@@ -40,7 +40,7 @@ describe('thenable-sync > ThenableSync perf', function () {
         return runPromise()
       },
     )
-    
+
     console.log(result)
   })
 })
