@@ -6,18 +6,18 @@ export class Priority {
     this.parent = parent
   }
 
-  private _brunch: number[] = null
-  get brunch(): number[] {
-    if (!this._brunch) {
-      const brunch = [this.order]
+  private _branch: number[] = null
+  get branch(): number[] {
+    if (!this._branch) {
+      const branch = [this.order]
       let parent = this.parent
       while (parent != null) {
-        brunch.push(parent.order)
+        branch.push(parent.order)
         parent = parent.parent
       }
-      this._brunch = brunch
+      this._branch = branch
     }
-    return this._brunch
+    return this._branch
   }
 
 }
@@ -37,8 +37,8 @@ export function priorityCompare(o1: Priority, o2: Priority): number {
     return o1.order <= 0 ? -1 : 1
   }
 
-  const b1 = o1.brunch
-  const b2 = o2.brunch
+  const b1 = o1.branch
+  const b2 = o2.branch
   const len1 = b1.length
   const len2 = b2.length
   const len = len1 < len2 ? len1 : len2
