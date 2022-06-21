@@ -4,8 +4,7 @@ import {PriorityQueue} from 'src/async/priority-queue'
 import {Priority} from 'src/sync/priority'
 import {IAbortSignalFast} from '@flemist/abort-controller-fast'
 import {promiseToAbortable} from 'src/async/abort-controller-fast-utils'
-import {ITimeController} from '../time-controller/contracts'
-import {timeControllerDefault} from '../time-controller/timeControllerDefault'
+import {ITimeController, timeControllerDefault} from '@flemist/time-controller'
 
 export class TimeLimit implements ITimeLimit {
   private readonly _timeController: ITimeController
@@ -47,7 +46,7 @@ export class TimeLimit implements ITimeLimit {
 
   private readonly _tickFunc: (abortSignal?: IAbortSignalFast) => Promise<void>
   tick(abortSignal?: IAbortSignalFast): Promise<void> {
-    return promiseToAbortable(this._tickPromise.promise, abortSignal)
+    return promiseToAbortable(abortSignal, this._tickPromise.promise)
   }
 
   available() {

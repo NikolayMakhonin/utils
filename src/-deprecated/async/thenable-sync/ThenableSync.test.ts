@@ -409,7 +409,7 @@ describe('thenable-sync > ThenableSync', function () {
   })
 
   it('resolveAsync', async function () {
-    const iterations = await testVariants({
+    await testVariants({
       hasCustomResolveValue    : [false, true],
       dontThrowOnImmediateError: [false, true],
       isError                  : [false, true],
@@ -424,9 +424,7 @@ describe('thenable-sync > ThenableSync', function () {
       hasOnrejected       : [false, true],
       onrejectedAsyncType1: ({hasOnrejected}) => !hasOnrejected ? [AsyncType.Value] : asyncTypesValues,
       onrejectedAsyncType2: ({hasOnrejected}) => !hasOnrejected ? [AsyncType.Value] : asyncTypesValues,
-    })
-
-    console.log('iterations: ' + iterations)
+    })()
   })
 
   xit('million promises', async function () {

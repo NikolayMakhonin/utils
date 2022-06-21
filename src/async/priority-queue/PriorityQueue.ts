@@ -1,10 +1,9 @@
 import {PromiseOrValue} from './contracts'
-import {PairingHeap, PairingNode} from 'src/sync/pairing-heap'
+import {PairingHeap, PairingNode} from '@flemist/pairing-heap'
 import {IObjectPool} from 'src/sync/object-pool/contracts'
 import {CustomPromise} from 'src/async/custom-promise'
 import {Priority, priorityCompare} from 'src/sync/priority'
 import {IAbortSignalFast} from '@flemist/abort-controller-fast'
-import {promiseToAbortable} from 'src/async/abort-controller-fast-utils'
 
 type TQueueItem<T> = {
   func: (abortSignal?: IAbortSignalFast) => PromiseOrValue<T>
@@ -39,7 +38,7 @@ export class PriorityQueue {
     priority?: Priority,
     abortSignal?: IAbortSignalFast,
   ): Promise<T> {
-    const promise = new CustomPromise<T>()
+    const promise = new CustomPromise<T>(abortSignal)
 
     this._queue.add({
       priority,
@@ -51,7 +50,7 @@ export class PriorityQueue {
 
     void this._process()
 
-    return promiseToAbortable(promise.promise, abortSignal)
+    return promise.promise
   }
 
   _processRunning: boolean

@@ -5,7 +5,7 @@ import {TimeLimits} from './TimeLimits'
 import {delay} from 'src/async/delay'
 import {PriorityQueue} from 'src/async/priority-queue'
 import {priorityCreate} from 'src/sync/priority'
-import {TimeControllerMock} from '../time-controller/timeControllerMock'
+import {TimeControllerMock} from '@flemist/time-controller'
 import {IAbortSignalFast} from '@flemist/abort-controller-fast'
 import {createTestVariants} from '@flemist/test-variants'
 
@@ -137,11 +137,11 @@ describe('time-limits > TimeLimits', function () {
       timeLimitsTree   : [false],
       asyncTime        : [500],
       timeMs           : [1000],
-    })
+    })()
   })
 
   it('combinations', async function () {
-    const iterations = await testVariants({
+    await testVariants({
       withPriorityQueue: [true, false],
       mode             : ['sync', 'async', 'random'],
       maxCount         : [1, 10],
@@ -152,8 +152,6 @@ describe('time-limits > TimeLimits', function () {
             : [0]
       },
       timeMs: [1000],
-    })
-
-    console.log(iterations)
+    })()
   })
 })
