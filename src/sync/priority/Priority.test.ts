@@ -90,40 +90,35 @@ describe('priority > Priority', function () {
     order2: number,
     order3: number,
     order4: number,
-  ): [Priority, number] {
-    let count = 0
+  ) {
     let result: Priority
     let priority: Priority
     if (order1 != null) {
-      count++
       priority = priorityCreate(order1)
       if (index >= 1) {
         result = priority
       }
     }
     if (order2 != null) {
-      count++
       priority = priorityCreate(order2, priority)
       if (index >= 2) {
         result = priority
       }
     }
     if (order3 != null) {
-      count++
       priority = priorityCreate(order3, priority)
       if (index >= 3) {
         result = priority
       }
     }
     if (order4 != null) {
-      count++
       priority = priorityCreate(order4, priority)
       if (index >= 4) {
         result = priority
       }
     }
 
-    return [result, count]
+    return result
   }
   
   const testVariants = createTestVariants(({
@@ -166,14 +161,14 @@ describe('priority > Priority', function () {
       order2_4,
     )
     
-    const [priority1, count1] = createTestPriority(
+    const priority1 = createTestPriority(
       index1,
       order1_1,
       order1_2,
       order1_3,
       order1_4,
     )
-    const [priority2, count2] = createTestPriority(
+    const priority2 = createTestPriority(
       index2,
       order2_1,
       order2_2,
@@ -187,8 +182,6 @@ describe('priority > Priority', function () {
     const actual = priorityCompare(priority1, priority2)
     
     assert.strictEqual(actual, expected, priority1Str + ', ' + priority2Str)
-
-
   })
 
   it('variants', async function () {
