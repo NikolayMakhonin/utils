@@ -22,13 +22,8 @@ export function queueItemLessThan(o1: TQueueItem<any>, o2: TQueueItem<any>): boo
 export class PriorityQueue {
   private readonly _queue: PairingHeap<TQueueItem<any>>
 
-  constructor({
-    objectPool,
-  }: {
-    objectPool?: IObjectPool<PairingNode<TQueueItem<any>>>,
-  } = {}) {
+  constructor() {
     this._queue = new PairingHeap<TQueueItem<any>>({
-      objectPool,
       lessThanFunc: queueItemLessThan,
     })
   }
@@ -54,7 +49,7 @@ export class PriorityQueue {
   }
 
   _processRunning: boolean
-  async _process() {
+  private async _process() {
     if (this._processRunning) {
       return
     }

@@ -22,8 +22,8 @@ export class Priority {
 
 }
 
-export function priorityCreate(order: number, parent?: Priority) {
-  return new Priority(order, parent)
+export function priorityCreate(order: number|null, parent?: Priority) {
+  return order == null ? null : new Priority(order, parent)
 }
 
 export function priorityCompare(o1: Priority, o2: Priority): number {
