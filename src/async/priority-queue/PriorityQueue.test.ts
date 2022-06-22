@@ -65,15 +65,15 @@ describe('priority-queue > PriorityQueue', function () {
     timeStart: number,
   ) {
     return function func(abortSignal?: IAbortSignalFast) {
-      results.push(`${name} start (${timeController.now() - timeStart})`)
+      results.push(`${timeController.now() - timeStart}: ${name} start`)
       if (delayTime != null) {
-        return delay(delayTime, abortSignal)
+        return delay(delayTime, abortSignal, timeController)
           .then(() => {
-            results.push(`${name}: end (${timeController.now() - timeStart})`)
+            results.push(`${timeController.now() - timeStart}: ${name} end`)
             return name
           })
       }
-      results.push(`${name}: end (${timeController.now() - timeStart})`)
+      results.push(`${timeController.now() - timeStart}: ${name} end`)
       return name
     }
   }
@@ -88,38 +88,25 @@ describe('priority-queue > PriorityQueue', function () {
     const func = createFunc(funcParams.name, results, funcParams.delayRun, timeController, timeStart)
     
     async function enqueue() {
-      results.push(`${funcParams.name} enqueue (${timeController.now() - timeStart})`)
+      results.push(`${timeController.now() - timeStart}: ${funcParams.name} enqueue`)
       const promise = priorityQueue.run(func, priorityCreate(funcParams.order))
       assert.ok(typeof promise.then === 'function')
       const result = await promise
-      results.push(`${funcParams.name} result: ${result} (${timeController.now() - timeStart})`)
+      results.push(`${timeController.now() - timeStart}: ${funcParams.name} result: ${result}`)
     }
 
     timeController.setTimeout(enqueue, funcParams.delayStart)
   }
 
-  const funcsParams: FuncParams[] = [
-    {
-      name      : 'func1',
-      delayStart: 0,
-      delayRun  : 0,
-      order     : 0,
-    },
-    {
-      name      : 'func2',
-      delayStart: 0,
-      delayRun  : 0,
-      order     : 0,
-    },
-    {
-      name      : 'func3',
-      delayStart: 0,
-      delayRun  : 0,
-      order     : 0,
-    },
-  ]
+  async function awaiter(timeController: TimeControllerMock) {
+    for (let i = 0; i < 10; i++) {
+      // eslint-disable-next-line @typescript-eslint/await-thenable
+      timeController.addTime(0)
+      await 0
+    }
+  }
 
-  const testVariants = createTestVariants(({
+  const testVariants = createTestVariants(async ({
     delayRun1,
     delayRun2,
     delayRun3,
@@ -147,54 +134,122 @@ describe('priority-queue > PriorityQueue', function () {
     const results = []
     const timeController = new TimeControllerMock()
     const priorityQueue = new PriorityQueue()
-    funcsParams[0].delayStart = delayStart1
-    funcsParams[1].delayStart = delayStart2
-    funcsParams[2].delayStart = delayStart3
-    funcsParams[0].delayRun = delayRun1
-    funcsParams[1].delayRun = delayRun2
-    funcsParams[2].delayRun = delayRun3
-    funcsParams[0].order = order1
-    funcsParams[1].order = order2
-    funcsParams[2].order = order3
+    const funcsParams: FuncParams[] = [
+      {
+        name      : 'func1',
+        delayStart: delayStart1,
+        delayRun  : delayRun1,
+        order     : order1,
+      },
+      {
+        name      : 'func2',
+        delayStart: delayStart2,
+        delayRun  : delayRun2,
+        order     : order2,
+      },
+      {
+        name      : 'func3',
+        delayStart: delayStart3,
+        delayRun  : delayRun3,
+        order     : order3,
+      },
+    ]
+    const len = funcsParams.length
 
     const timeStart = timeController.now()
 
-    funcsParams.forEach(funcParams => {
+    for (let i = 0; i < len; i++) {
+      const funcParams = funcsParams[i]
       enqueueFunc(results, funcParams, timeController, timeStart, priorityQueue)
-    })
-
-    const checkResults = []
-    function getCheckResults() {
-      const time = timeController.now() - timeStart
-      let index = 0
-      funcsParams.forEach(funcParams => {
-        if (time >= funcParams.delayStart) {
-          checkResults[index++] = `${funcParams.name} enqueue (${funcParams.delayStart})`
-        }
-      })
-      checkResults.length = index
-      return checkResults
     }
 
-    timeController.addTime(0)
-    assert.deepStrictEqual(results, getCheckResults())
+    function getExpectedResults() {
+      const resultsExpected = []
+
+      const state = []
+      for (let i = 0; i < len; i++) {
+        state[i] = null
+      }
+
+      let time = 0
+      let index = 0
+      let startedFuncParamsIndex: number
+      let startedFuncParamsEndTime: number
+      let startedFuncParams: FuncParams
+
+      while (time < 10) {
+        for (let i = 0; i < len; i++) {
+          const funcParams = funcsParams[i]
+          if (state[i] === null) {
+            if (time === funcParams.delayStart) {
+              resultsExpected[index++] = `${funcParams.delayStart}: ${funcParams.name} enqueue`
+              state[i] = 'enqueued'
+            }
+          }
+        }
+
+        if (startedFuncParams && time === startedFuncParamsEndTime) {
+          state[startedFuncParamsIndex] = 'completed'
+          resultsExpected[index++] = `${time}: ${startedFuncParams.name} end`
+          resultsExpected[index++] = `${time}: ${startedFuncParams.name} result: ${startedFuncParams.name}`
+          startedFuncParams = null
+          startedFuncParamsIndex = null
+        }
+
+        if (!startedFuncParams) {
+          for (let i = 0; i < len; i++) {
+            if (state[i] === 'enqueued') {
+              const funcParams = funcsParams[i]
+              if (
+                !startedFuncParams
+                || funcParams.order < startedFuncParams.order
+                || funcParams.order === startedFuncParams.order && funcParams.delayStart < startedFuncParams.delayStart
+              ) {
+                startedFuncParamsIndex = i
+                startedFuncParams = funcParams
+              }
+            }
+          }
+          if (startedFuncParams) {
+            state[startedFuncParamsIndex] = 'started'
+            resultsExpected[index++] = `${time}: ${startedFuncParams.name} start`
+            startedFuncParamsEndTime = time + (startedFuncParams.delayRun || 0)
+          } else {
+            time++
+          }
+        } else {
+          time++
+        }
+      }
+
+      return resultsExpected
+    }
+
+    assert.deepStrictEqual(results, [])
+
+    for (let i = 0; i < 20; i++) {
+      await awaiter(timeController)
+      timeController.addTime(1)
+    }
+
+    assert.deepStrictEqual(results, getExpectedResults())
   })
 
   it('variants', async function () {
     this.timeout(300000)
 
     await testVariants({
-      delayRun1: [null, 0, 1, 2],
-      delayRun2: [null, 0, 1, 2],
-      delayRun3: [null, 0, 1, 2],
+      order1: [0, 1, 2],
+      order2: [0, 1, 2],
+      order3: [0, 1, 2],
+
+      delayRun1: [null, 1, 2],
+      delayRun2: [null, 1, 2],
+      delayRun3: [null, 1, 2],
 
       delayStart1: [0, 1, 2],
       delayStart2: [0, 1, 2],
       delayStart3: [0, 1, 2],
-
-      order1: [null, 0, 1, 2],
-      order2: [null, 0, 1, 2],
-      order3: [null, 0, 1, 2],
     })()
   })
 })

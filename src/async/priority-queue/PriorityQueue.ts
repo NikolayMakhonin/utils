@@ -2,7 +2,7 @@ import {PromiseOrValue} from './contracts'
 import {PairingHeap, PairingNode} from '@flemist/pairing-heap'
 import {IObjectPool} from 'src/sync/object-pool/contracts'
 import {CustomPromise} from 'src/async/custom-promise'
-import {Priority, priorityCompare} from 'src/sync/priority'
+import {Priority, priorityCompare, priorityCreate} from 'src/sync/priority'
 import {IAbortSignalFast} from '@flemist/abort-controller-fast'
 
 type TQueueItem<T> = {
@@ -18,6 +18,8 @@ const emptyFunc = () => {}
 export function queueItemLessThan(o1: TQueueItem<any>, o2: TQueueItem<any>): boolean {
   return priorityCompare(o1.priority, o2.priority) < 0
 }
+
+let nextOrder: number = 1
 
 export class PriorityQueue {
   private readonly _queue: PairingHeap<TQueueItem<any>>
@@ -36,11 +38,11 @@ export class PriorityQueue {
     const promise = new CustomPromise<T>(abortSignal)
 
     this._queue.add({
-      priority,
+      priority: priorityCreate(nextOrder++, priority),
       func,
       abortSignal,
-      resolve: promise.resolve,
-      reject : promise.reject,
+      resolve : promise.resolve,
+      reject  : promise.reject,
     })
 
     void this._process()
