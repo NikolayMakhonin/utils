@@ -397,7 +397,7 @@ describe('priority-queue > PriorityQueue', function _describe() {
 
     await testVariants({
       abortTime1: [0, 1],
-      abortTime2: [1],
+      abortTime2: [0, 1],
       abortTime3: [0, 2],
 
       order1: [0, 1, 2],
