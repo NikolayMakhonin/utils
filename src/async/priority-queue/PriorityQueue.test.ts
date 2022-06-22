@@ -1,7 +1,7 @@
 import {PriorityQueue} from './PriorityQueue'
 import {priorityCreate} from 'src/sync/priority'
 import {createTestVariants} from '@flemist/test-variants'
-import {IAbortSignalFast} from '@flemist/abort-controller-fast'
+import {IAbortSignalFast, IAbortControllerFast, AbortControllerFast, AbortError} from '@flemist/abort-controller-fast'
 import {ITimeController, TimeControllerMock} from '@flemist/time-controller'
 import {delay} from '~/src'
 
@@ -52,8 +52,10 @@ describe('priority-queue > PriorityQueue', function () {
   
   type FuncParams = {
     name: string,
-    delayStart: number,
-    delayRun: number,
+    startTime: number,
+    runTime: number,
+    abortTime: number,
+    abortController: IAbortControllerFast
     order: number,
   }
 
@@ -73,6 +75,9 @@ describe('priority-queue > PriorityQueue', function () {
             return name
           })
       }
+      if (abortSignal.aborted) {
+        throw abortSignal.reason
+      }
       results.push(`${timeController.now() - timeStart}: ${name} end`)
       return name
     }
@@ -85,17 +90,32 @@ describe('priority-queue > PriorityQueue', function () {
     timeStart: number,
     priorityQueue: PriorityQueue,
   ) {
-    const func = createFunc(funcParams.name, results, funcParams.delayRun, timeController, timeStart)
+    const func = createFunc(funcParams.name, results, funcParams.runTime, timeController, timeStart)
     
     async function enqueue() {
       results.push(`${timeController.now() - timeStart}: ${funcParams.name} enqueue`)
-      const promise = priorityQueue.run(func, priorityCreate(funcParams.order))
+      const promise = priorityQueue.run(func, priorityCreate(funcParams.order), funcParams.abortController.signal)
       assert.ok(typeof promise.then === 'function')
-      const result = await promise
-      results.push(`${timeController.now() - timeStart}: ${funcParams.name} result: ${result}`)
+      try {
+        const result = await promise
+        results.push(`${timeController.now() - timeStart}: ${funcParams.name} result: ${result}`)
+      }
+      catch (err) {
+        if (!(err instanceof AbortError)) {
+          results.push('ERROR: ' + err.stack)
+        }
+        else {
+          results.push(`${timeController.now() - timeStart}: ${funcParams.name} aborted: ${err.reason}`)
+        }
+      }
     }
 
-    timeController.setTimeout(enqueue, funcParams.delayStart)
+    timeController.setTimeout(enqueue, funcParams.startTime)
+    if (funcParams.abortTime != null) {
+      timeController.setTimeout(() => {
+        funcParams.abortController.abort(new AbortError('', funcParams.name))
+      }, funcParams.startTime + funcParams.abortTime)
+    }
   }
 
   async function awaiter(timeController: TimeControllerMock) {
@@ -107,6 +127,14 @@ describe('priority-queue > PriorityQueue', function () {
   }
 
   const testVariants = createTestVariants(async ({
+    abortTime1,
+    abortTime2,
+    abortTime3,
+
+    order1,
+    order2,
+    order3,
+
     delayRun1,
     delayRun2,
     delayRun3,
@@ -114,11 +142,15 @@ describe('priority-queue > PriorityQueue', function () {
     delayStart1,
     delayStart2,
     delayStart3,
-
-    order1,
-    order2,
-    order3,
   }: {
+    abortTime1: number,
+    abortTime2: number,
+    abortTime3: number,
+
+    order1: number,
+    order2: number,
+    order3: number,
+
     delayRun1: number,
     delayRun2: number,
     delayRun3: number,
@@ -126,32 +158,34 @@ describe('priority-queue > PriorityQueue', function () {
     delayStart1: number,
     delayStart2: number,
     delayStart3: number,
-
-    order1: number,
-    order2: number,
-    order3: number,
   }) => {
     const results = []
     const timeController = new TimeControllerMock()
     const priorityQueue = new PriorityQueue()
     const funcsParams: FuncParams[] = [
       {
-        name      : 'func1',
-        delayStart: delayStart1,
-        delayRun  : delayRun1,
-        order     : order1,
+        name           : 'func1',
+        startTime      : delayStart1,
+        runTime        : delayRun1,
+        abortTime      : abortTime1,
+        abortController: new AbortControllerFast(),
+        order          : order1,
       },
       {
-        name      : 'func2',
-        delayStart: delayStart2,
-        delayRun  : delayRun2,
-        order     : order2,
+        name           : 'func2',
+        startTime      : delayStart2,
+        runTime        : delayRun2,
+        abortTime      : abortTime2,
+        abortController: new AbortControllerFast(),
+        order          : order2,
       },
       {
-        name      : 'func3',
-        delayStart: delayStart3,
-        delayRun  : delayRun3,
-        order     : order3,
+        name           : 'func3',
+        startTime      : delayStart3,
+        runTime        : delayRun3,
+        abortTime      : abortTime3,
+        abortController: new AbortControllerFast(),
+        order          : order3,
       },
     ]
     const len = funcsParams.length
@@ -175,15 +209,34 @@ describe('priority-queue > PriorityQueue', function () {
       let index = 0
       let startedFuncParamsIndex: number
       let startedFuncParamsEndTime: number
+      let startedFuncParamsAbortTime: number
       let startedFuncParams: FuncParams
 
       while (time < 10) {
         for (let i = 0; i < len; i++) {
           const funcParams = funcsParams[i]
           if (state[i] === null) {
-            if (time === funcParams.delayStart) {
-              resultsExpected[index++] = `${funcParams.delayStart}: ${funcParams.name} enqueue`
+            if (time === funcParams.startTime) {
               state[i] = 'enqueued'
+              resultsExpected[index++] = `${funcParams.startTime}: ${funcParams.name} enqueue`
+              if (funcParams.abortTime === 0) {
+                state[i] = 'aborted'
+                resultsExpected[index++] = `${time}: ${funcParams.name} aborted: ${funcParams.name}`
+              }
+            }
+          }
+        }
+
+        for (let i = 0; i < len; i++) {
+          const funcParams = funcsParams[i]
+          if (state[i] === 'started' || state[i] === 'enqueued') {
+            if (funcParams.abortTime != null && time === funcParams.startTime + funcParams.abortTime) {
+              state[i] = 'aborted'
+              resultsExpected[index++] = `${time}: ${funcParams.name} aborted: ${funcParams.name}`
+              if (startedFuncParams === funcParams) {
+                startedFuncParams = null
+                startedFuncParamsIndex = null
+              }
             }
           }
         }
@@ -203,7 +256,7 @@ describe('priority-queue > PriorityQueue', function () {
               if (
                 !startedFuncParams
                 || funcParams.order < startedFuncParams.order
-                || funcParams.order === startedFuncParams.order && funcParams.delayStart < startedFuncParams.delayStart
+                || funcParams.order === startedFuncParams.order && funcParams.startTime < startedFuncParams.startTime
               ) {
                 startedFuncParamsIndex = i
                 startedFuncParams = funcParams
@@ -211,13 +264,20 @@ describe('priority-queue > PriorityQueue', function () {
             }
           }
           if (startedFuncParams) {
+            startedFuncParamsAbortTime = startedFuncParams.abortTime == null
+              ? null
+              : startedFuncParams.startTime + startedFuncParams.abortTime
             state[startedFuncParamsIndex] = 'started'
-            resultsExpected[index++] = `${time}: ${startedFuncParams.name} start`
-            startedFuncParamsEndTime = time + (startedFuncParams.delayRun || 0)
-          } else {
+            if (time !== startedFuncParamsAbortTime) {
+              resultsExpected[index++] = `${time}: ${startedFuncParams.name} start`
+              startedFuncParamsEndTime = time + (startedFuncParams.runTime || 0)
+            }
+          }
+          else {
             time++
           }
-        } else {
+        }
+        else {
           time++
         }
       }
@@ -239,6 +299,10 @@ describe('priority-queue > PriorityQueue', function () {
     this.timeout(300000)
 
     await testVariants({
+      abortTime1: [null, 0, 1, 2],
+      abortTime2: [null, 0, 1, 2],
+      abortTime3: [null, 0, 1, 2],
+
       order1: [0, 1, 2],
       order2: [0, 1, 2],
       order3: [0, 1, 2],

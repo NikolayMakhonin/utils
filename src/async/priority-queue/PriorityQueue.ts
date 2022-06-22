@@ -65,6 +65,11 @@ export class PriorityQueue {
       }
 
       const item = this._queue.deleteMin()
+      if (item.abortSignal && item.abortSignal.aborted) {
+        item.reject(item.abortSignal.reason)
+        continue
+      }
+
       try {
         const result = item.func && await item.func(item.abortSignal)
         item.resolve(result)
