@@ -92,30 +92,32 @@ describe('priority-queue > PriorityQueue', function () {
   ) {
     const func = createFunc(funcParams.name, results, funcParams.runTime, timeController, timeStart)
     
-    async function enqueue() {
+    function enqueue() {
       results.push(`${timeController.now() - timeStart}: ${funcParams.name} enqueue`)
       const promise = priorityQueue.run(func, priorityCreate(funcParams.order), funcParams.abortController.signal)
       assert.ok(typeof promise.then === 'function')
-      try {
-        const result = await promise
-        results.push(`${timeController.now() - timeStart}: ${funcParams.name} result: ${result}`)
-      }
-      catch (err) {
-        if (!(err instanceof AbortError)) {
-          results.push('ERROR: ' + err.stack)
-        }
-        else {
-          results.push(`${timeController.now() - timeStart}: ${funcParams.name} aborted: ${err.reason}`)
-        }
-      }
+      promise
+        .then(
+          result => {
+            results.push(`${timeController.now() - timeStart}: ${funcParams.name} result: ${result}`)
+          },
+          err => {
+            if (!(err instanceof AbortError)) {
+              results.push('ERROR: ' + err.stack)
+            }
+            else {
+              results.push(`${timeController.now() - timeStart}: ${funcParams.name} aborted: ${err.reason}`)
+            }
+          },
+        )
     }
-
-    timeController.setTimeout(enqueue, funcParams.startTime)
+    
     if (funcParams.abortTime != null) {
       timeController.setTimeout(() => {
         funcParams.abortController.abort(new AbortError('', funcParams.name))
       }, funcParams.startTime + funcParams.abortTime)
     }
+    timeController.setTimeout(enqueue, funcParams.startTime)
   }
 
   async function awaitTime(timeController: TimeControllerMock, time: number, awaitsPerTime: number) {
@@ -288,7 +290,7 @@ describe('priority-queue > PriorityQueue', function () {
 
     assert.strictEqual(results.length, 0)
 
-    await awaitTime(timeController, 9, 10)
+    await awaitTime(timeController, 9, 15)
 
     assert.deepStrictEqual(results, getExpectedResults(funcsParams))
 
@@ -298,7 +300,7 @@ describe('priority-queue > PriorityQueue', function () {
     assert.strictEqual(results.length, 0)
   })
 
-  it('custom', async function () {
+  it('custom 1', async function () {
     this.timeout(300000)
 
     await testVariants({
@@ -317,6 +319,63 @@ describe('priority-queue > PriorityQueue', function () {
     })()
   })
 
+  it('custom 2', async function () {
+    this.timeout(300000)
+
+    await testVariants({
+      abortTime1 : [null],
+      abortTime2 : [null],
+      abortTime3 : [0],
+      order1     : [0],
+      order2     : [0],
+      order3     : [0],
+      delayRun1  : [null],
+      delayRun2  : [1],
+      delayRun3  : [null],
+      delayStart1: [0],
+      delayStart2: [0],
+      delayStart3: [1],
+    })()
+  })
+  
+  it('custom 3', async function () {
+    this.timeout(300000)
+
+    await testVariants({
+      abortTime1 : [null],
+      abortTime2 : [null],
+      abortTime3 : [0],
+      order1     : [0],
+      order2     : [0],
+      order3     : [0],
+      delayRun1  : [null],
+      delayRun2  : [null],
+      delayRun3  : [null],
+      delayStart1: [0],
+      delayStart2: [0],
+      delayStart3: [0],
+    })()
+  })
+
+  it('custom 4', async function () {
+    this.timeout(300000)
+
+    await testVariants({
+      abortTime1 : [null],
+      abortTime2 : [null],
+      abortTime3 : [0],
+      order1     : [0],
+      order2     : [0],
+      order3     : [0],
+      delayRun1  : [null],
+      delayRun2  : [null],
+      delayRun3  : [null],
+      delayStart1: [0],
+      delayStart2: [0],
+      delayStart3: [0],
+    })()
+  })
+  
   it('variants', async function () {
     this.timeout(1200000)
 
