@@ -316,7 +316,7 @@ describe('priority-queue > PriorityQueue', function _describe() {
     assert.strictEqual(results.length, 0)
   })
 
-  it('custom 1', async function () {
+  xit('custom 1', async function () {
     this.timeout(300000)
 
     await testVariants({
@@ -335,7 +335,7 @@ describe('priority-queue > PriorityQueue', function _describe() {
     })()
   })
 
-  it('custom 2', async function () {
+  xit('custom 2', async function () {
     this.timeout(300000)
 
     await testVariants({
@@ -354,7 +354,7 @@ describe('priority-queue > PriorityQueue', function _describe() {
     })()
   })
   
-  it('custom 3', async function () {
+  xit('custom 3', async function () {
     this.timeout(300000)
 
     await testVariants({
@@ -373,7 +373,7 @@ describe('priority-queue > PriorityQueue', function _describe() {
     })()
   })
 
-  it('custom 4', async function () {
+  xit('custom 4', async function () {
     this.timeout(300000)
 
     await testVariants({
@@ -392,7 +392,7 @@ describe('priority-queue > PriorityQueue', function _describe() {
     })()
   })
   
-  it('profiling', async function _it_profiling() {
+  xit('profiling', async function _it_profiling() {
     this.timeout(1200000)
 
     await testVariants({
