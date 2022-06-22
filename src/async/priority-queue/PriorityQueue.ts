@@ -45,40 +45,50 @@ export class PriorityQueue {
       reject  : promise.reject,
     })
 
-    void this._process()
+    this._process()
 
     return promise.promise
   }
 
   _processRunning: boolean
-  private async _process() {
+  private _process() {
     if (this._processRunning) {
       return
     }
     this._processRunning = true
 
-    while (true) {
-      await Promise.resolve().then(emptyFunc)
-
-      if (this._queue.isEmpty) {
-        break
+    const _this = this
+    const queue = this._queue
+    function next() {
+      if (queue.isEmpty) {
+        _this._processRunning = false
+        return
       }
 
-      const item = this._queue.deleteMin()
+      const item = queue.deleteMin()
       if (item.abortSignal && item.abortSignal.aborted) {
         item.reject(item.abortSignal.reason)
-        continue
+      }
+      else {
+        try {
+          const result = item.func && item.func(item.abortSignal)
+          if (result && typeof result.then === 'function') {
+            result
+              .then(item.resolve)
+              .catch(item.reject)
+              .then(next)
+            return
+          }
+          item.resolve(result)
+        }
+        catch (err) {
+          item.reject(err)
+        }
       }
 
-      try {
-        const result = item.func && await item.func(item.abortSignal)
-        item.resolve(result)
-      }
-      catch (err) {
-        item.reject(err)
-      }
+      void Promise.resolve().then(emptyFunc).then(next)
     }
 
-    this._processRunning = false
+    void Promise.resolve().then(emptyFunc).then(next)
   }
 }

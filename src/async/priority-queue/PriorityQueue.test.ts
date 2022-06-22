@@ -118,12 +118,101 @@ describe('priority-queue > PriorityQueue', function () {
     }
   }
 
-  async function awaiter(timeController: TimeControllerMock) {
-    for (let i = 0; i < 10; i++) {
-      // eslint-disable-next-line @typescript-eslint/await-thenable
-      timeController.addTime(0)
-      await 0
+  async function awaitTime(timeController: TimeControllerMock, time: number, awaitsPerTime: number) {
+    for (let i = 0; i < time; i++) {
+      for (let j = 0; j < awaitsPerTime; j++) {
+        // eslint-disable-next-line @typescript-eslint/await-thenable
+        timeController.addTime(0)
+        await 0
+      }
+      timeController.addTime(1)
     }
+  }
+
+  function getExpectedResults(funcsParams: FuncParams[]) {
+    const len = funcsParams.length
+
+    const resultsExpected = []
+
+    const state = []
+    for (let i = 0; i < len; i++) {
+      state[i] = null
+    }
+
+    let time = 0
+    let index = 0
+    let startedFuncParamsIndex: number
+    let startedFuncParamsEndTime: number
+    let startedFuncParamsAbortTime: number
+    let startedFuncParams: FuncParams
+
+    while (time < 10) {
+      for (let i = 0; i < len; i++) {
+        const funcParams = funcsParams[i]
+        if (state[i] === null) {
+          if (time === funcParams.startTime) {
+            state[i] = 'enqueued'
+            resultsExpected[index++] = `${funcParams.startTime}: ${funcParams.name} enqueue`
+          }
+        }
+      }
+
+      for (let i = 0; i < len; i++) {
+        const funcParams = funcsParams[i]
+        if (state[i] === 'started' || state[i] === 'enqueued') {
+          if (funcParams.abortTime != null && time === funcParams.startTime + funcParams.abortTime) {
+            state[i] = 'aborted'
+            resultsExpected[index++] = `${time}: ${funcParams.name} aborted: ${funcParams.name}`
+            if (startedFuncParams === funcParams) {
+              startedFuncParams = null
+              startedFuncParamsIndex = null
+            }
+          }
+        }
+      }
+
+      if (startedFuncParams && time === startedFuncParamsEndTime) {
+        state[startedFuncParamsIndex] = 'completed'
+        resultsExpected[index++] = `${time}: ${startedFuncParams.name} end`
+        resultsExpected[index++] = `${time}: ${startedFuncParams.name} result: ${startedFuncParams.name}`
+        startedFuncParams = null
+        startedFuncParamsIndex = null
+      }
+
+      if (!startedFuncParams) {
+        for (let i = 0; i < len; i++) {
+          if (state[i] === 'enqueued') {
+            const funcParams = funcsParams[i]
+            if (
+              !startedFuncParams
+              || funcParams.order < startedFuncParams.order
+              || funcParams.order === startedFuncParams.order && funcParams.startTime < startedFuncParams.startTime
+            ) {
+              startedFuncParamsIndex = i
+              startedFuncParams = funcParams
+            }
+          }
+        }
+        if (startedFuncParams) {
+          startedFuncParamsAbortTime = startedFuncParams.abortTime == null
+            ? null
+            : startedFuncParams.startTime + startedFuncParams.abortTime
+          state[startedFuncParamsIndex] = 'started'
+          if (time !== startedFuncParamsAbortTime) {
+            resultsExpected[index++] = `${time}: ${startedFuncParams.name} start`
+            startedFuncParamsEndTime = time + (startedFuncParams.runTime || 0)
+          }
+        }
+        else {
+          time++
+        }
+      }
+      else {
+        time++
+      }
+    }
+
+    return resultsExpected
   }
 
   const testVariants = createTestVariants(async ({
@@ -197,98 +286,35 @@ describe('priority-queue > PriorityQueue', function () {
       enqueueFunc(results, funcParams, timeController, timeStart, priorityQueue)
     }
 
-    function getExpectedResults() {
-      const resultsExpected = []
+    assert.strictEqual(results.length, 0)
 
-      const state = []
-      for (let i = 0; i < len; i++) {
-        state[i] = null
-      }
+    await awaitTime(timeController, 9, 10)
 
-      let time = 0
-      let index = 0
-      let startedFuncParamsIndex: number
-      let startedFuncParamsEndTime: number
-      let startedFuncParamsAbortTime: number
-      let startedFuncParams: FuncParams
+    assert.deepStrictEqual(results, getExpectedResults(funcsParams))
 
-      while (time < 10) {
-        for (let i = 0; i < len; i++) {
-          const funcParams = funcsParams[i]
-          if (state[i] === null) {
-            if (time === funcParams.startTime) {
-              state[i] = 'enqueued'
-              resultsExpected[index++] = `${funcParams.startTime}: ${funcParams.name} enqueue`
-            }
-          }
-        }
+    results.length = 0
+    timeController.addTime(1000000)
+    await awaitTime(timeController, 1, 20)
+    assert.strictEqual(results.length, 0)
+  })
 
-        for (let i = 0; i < len; i++) {
-          const funcParams = funcsParams[i]
-          if (state[i] === 'started' || state[i] === 'enqueued') {
-            if (funcParams.abortTime != null && time === funcParams.startTime + funcParams.abortTime) {
-              state[i] = 'aborted'
-              resultsExpected[index++] = `${time}: ${funcParams.name} aborted: ${funcParams.name}`
-              if (startedFuncParams === funcParams) {
-                startedFuncParams = null
-                startedFuncParamsIndex = null
-              }
-            }
-          }
-        }
+  it('custom', async function () {
+    this.timeout(300000)
 
-        if (startedFuncParams && time === startedFuncParamsEndTime) {
-          state[startedFuncParamsIndex] = 'completed'
-          resultsExpected[index++] = `${time}: ${startedFuncParams.name} end`
-          resultsExpected[index++] = `${time}: ${startedFuncParams.name} result: ${startedFuncParams.name}`
-          startedFuncParams = null
-          startedFuncParamsIndex = null
-        }
-
-        if (!startedFuncParams) {
-          for (let i = 0; i < len; i++) {
-            if (state[i] === 'enqueued') {
-              const funcParams = funcsParams[i]
-              if (
-                !startedFuncParams
-                || funcParams.order < startedFuncParams.order
-                || funcParams.order === startedFuncParams.order && funcParams.startTime < startedFuncParams.startTime
-              ) {
-                startedFuncParamsIndex = i
-                startedFuncParams = funcParams
-              }
-            }
-          }
-          if (startedFuncParams) {
-            startedFuncParamsAbortTime = startedFuncParams.abortTime == null
-              ? null
-              : startedFuncParams.startTime + startedFuncParams.abortTime
-            state[startedFuncParamsIndex] = 'started'
-            if (time !== startedFuncParamsAbortTime) {
-              resultsExpected[index++] = `${time}: ${startedFuncParams.name} start`
-              startedFuncParamsEndTime = time + (startedFuncParams.runTime || 0)
-            }
-          }
-          else {
-            time++
-          }
-        }
-        else {
-          time++
-        }
-      }
-
-      return resultsExpected
-    }
-
-    assert.deepStrictEqual(results, [])
-
-    for (let i = 0; i < 20; i++) {
-      await awaiter(timeController)
-      timeController.addTime(1)
-    }
-
-    assert.deepStrictEqual(results, getExpectedResults())
+    await testVariants({
+      abortTime1 : [null],
+      abortTime2 : [null],
+      abortTime3 : [null],
+      order1     : [0],
+      order2     : [0],
+      order3     : [0],
+      delayRun1  : [2],
+      delayRun2  : [2],
+      delayRun3  : [2],
+      delayStart1: [2],
+      delayStart2: [2],
+      delayStart3: [2],
+    })()
   })
 
   it('variants', async function () {
