@@ -219,10 +219,6 @@ describe('priority-queue > PriorityQueue', function () {
             if (time === funcParams.startTime) {
               state[i] = 'enqueued'
               resultsExpected[index++] = `${funcParams.startTime}: ${funcParams.name} enqueue`
-              if (funcParams.abortTime === 0) {
-                state[i] = 'aborted'
-                resultsExpected[index++] = `${time}: ${funcParams.name} aborted: ${funcParams.name}`
-              }
             }
           }
         }
