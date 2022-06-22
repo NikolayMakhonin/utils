@@ -318,7 +318,7 @@ describe('priority-queue > PriorityQueue', function () {
   })
 
   it('variants', async function () {
-    this.timeout(300000)
+    this.timeout(1200000)
 
     await testVariants({
       abortTime1: [null, 0, 1, 2],
