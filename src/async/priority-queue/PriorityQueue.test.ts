@@ -5,7 +5,7 @@ import {IAbortSignalFast, IAbortControllerFast, AbortControllerFast, AbortError}
 import {ITimeController, TimeControllerMock} from '@flemist/time-controller'
 import {delay} from '~/src'
 
-describe('priority-queue > PriorityQueue', function () {
+describe('priority-queue > PriorityQueue', function _describe() {
   it('base', async function () {
     const queue = new PriorityQueue()
     const log = []
@@ -70,7 +70,7 @@ describe('priority-queue > PriorityQueue', function () {
       results.push(`${timeController.now() - timeStart}: ${name} start`)
       if (delayTime != null) {
         return delay(delayTime, abortSignal, timeController)
-          .then(() => {
+          .then(function delayThen() {
             results.push(`${timeController.now() - timeStart}: ${name} end`)
             return name
           })
@@ -98,37 +98,53 @@ describe('priority-queue > PriorityQueue', function () {
       assert.ok(typeof promise.then === 'function')
       promise
         .then(
-          result => {
+          function runThen(result) {
             results.push(`${timeController.now() - timeStart}: ${funcParams.name} result: ${result}`)
           },
-          err => {
-            if (!(err instanceof AbortError)) {
+          function runError(err) {
+            if (typeof err !== 'string') {
               results.push('ERROR: ' + err.stack)
             }
             else {
-              results.push(`${timeController.now() - timeStart}: ${funcParams.name} aborted: ${err.reason}`)
+              results.push(`${timeController.now() - timeStart}: ${funcParams.name} aborted: ${err}`)
             }
           },
         )
     }
     
     if (funcParams.abortTime != null) {
-      timeController.setTimeout(() => {
-        funcParams.abortController.abort(new AbortError('', funcParams.name))
+      timeController.setTimeout(function abortTimerCallback() {
+        funcParams.abortController.abort(funcParams.name)
       }, funcParams.startTime + funcParams.abortTime)
     }
     timeController.setTimeout(enqueue, funcParams.startTime)
   }
 
-  async function awaitTime(timeController: TimeControllerMock, time: number, awaitsPerTime: number) {
-    for (let i = 0; i < time; i++) {
-      for (let j = 0; j < awaitsPerTime; j++) {
-        // eslint-disable-next-line @typescript-eslint/await-thenable
-        timeController.addTime(0)
-        await 0
+  function awaitTime(timeController: TimeControllerMock, time: number, awaitsPerTime: number) {
+    let i = 0
+    let j = 0
+    function next() {
+      if (j >= awaitsPerTime) {
+        i++
+        if (i >= time) {
+          return
+        }
+        timeController.addTime(1)
+        j = 0
       }
-      timeController.addTime(1)
+      timeController.addTime(0)
+      j++
+      return Promise.resolve().then(next)
     }
+    return next()
+    // for (let i = 0; i < time; i++) {
+    //   for (let j = 0; j < awaitsPerTime; j++) {
+    //     // eslint-disable-next-line @typescript-eslint/await-thenable
+    //     timeController.addTime(0)
+    //     await 0
+    //   }
+    //   timeController.addTime(1)
+    // }
   }
 
   function getExpectedResults(funcsParams: FuncParams[]) {
@@ -217,7 +233,7 @@ describe('priority-queue > PriorityQueue', function () {
     return resultsExpected
   }
 
-  const testVariants = createTestVariants(async ({
+  const testVariants = createTestVariants(async function testVariant({
     abortTime1,
     abortTime2,
     abortTime3,
@@ -249,7 +265,7 @@ describe('priority-queue > PriorityQueue', function () {
     delayStart1: number,
     delayStart2: number,
     delayStart3: number,
-  }) => {
+  }) {
     const results = []
     const timeController = new TimeControllerMock()
     const priorityQueue = new PriorityQueue()
@@ -376,6 +392,28 @@ describe('priority-queue > PriorityQueue', function () {
     })()
   })
   
+  it('profiling', async function _it_profiling() {
+    this.timeout(1200000)
+
+    await testVariants({
+      abortTime1: [0, 1],
+      abortTime2: [1],
+      abortTime3: [0, 2],
+
+      order1: [0, 1, 2],
+      order2: [0, 1, 2],
+      order3: [0, 1, 2],
+
+      delayRun1: [null, 1, 2],
+      delayRun2: [null, 1, 2],
+      delayRun3: [null, 1, 2],
+
+      delayStart1: [0, 1, 2],
+      delayStart2: [0, 1, 2],
+      delayStart3: [0, 1, 2],
+    })()
+  })
+
   it('variants', async function () {
     this.timeout(1200000)
 

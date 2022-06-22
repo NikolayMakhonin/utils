@@ -12,7 +12,7 @@ type TQueueItem<T> = {
   reject: (error: Error) => void
 }
 
-const emptyFunc = o => o
+const emptyFunc = function emptyFunc(o) { return o }
 
 export function queueItemLessThan(o1: TQueueItem<any>, o2: TQueueItem<any>): boolean {
   return priorityCompare(o1.priority, o2.priority) < 0

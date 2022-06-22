@@ -1,6 +1,6 @@
 import {IAbortSignalFast} from '@flemist/abort-controller-fast'
 
-const emptyFunc = () => {}
+const emptyFunc = function emptyFunc() {}
 
 export class CustomPromise<TResult> {
   readonly promise: Promise<TResult>
@@ -16,20 +16,20 @@ export class CustomPromise<TResult> {
     else {
       let resolve: (result: TResult) => void
       let reject: (error: any) => void
-      this.promise = new Promise<TResult>((_resolve, _reject) => {
+      this.promise = new Promise<TResult>(function executor(_resolve, _reject) {
         resolve = _resolve
         reject = _reject
       })
 
       if (abortSignal) {
-        const unsubscribe = abortSignal.subscribe((reason) => {
+        const unsubscribe = abortSignal.subscribe(function abortListener(reason) {
           reject(reason)
         })
-        this.resolve = (result) => {
+        this.resolve = function _resolve(result) {
           unsubscribe()
           resolve(result)
         }
-        this.reject = (error) => {
+        this.reject = function _reject(error) {
           unsubscribe()
           reject(error)
         }
