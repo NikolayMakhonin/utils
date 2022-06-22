@@ -9,6 +9,6 @@ module.exports = {
   'watch-files': ['./src/**'],
   ignore       : ['./**/*.d.ts', './**/-deprecated/**'],
   'node-option': [
-
+    // 'prof',
   ],
 }
