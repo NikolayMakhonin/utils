@@ -414,7 +414,7 @@ describe('priority-queue > PriorityQueue', function _describe() {
     })()
   })
 
-  it('variants', async function () {
+  xit('variants', async function () {
     this.timeout(1200000)
 
     await testVariants({
